@@ -3,7 +3,7 @@ import { ArrowRight, ChevronDown, ShieldCheck } from 'lucide-react';
 import { useExchange } from '../context/ExchangeContext';
 import { FIAT_RATES } from '../data/seedData';
 import { CryptoSymbol, FiatCurrency } from '../types/exchange';
-import { formatCompactFiat, formatFiat, formatPrice } from '../utils/format';
+import { formatCompactFiat, formatFiat, formatOrderLimit, formatPrice } from '../utils/format';
 import { CoinIcon } from '../components/CoinIcon';
 
 const FAQ_ITEMS = [
@@ -151,8 +151,8 @@ export const HomeView: React.FC = () => {
               <div className="mt-1 text-[11px] sm:text-xs text-slate-500 dark:text-[#848E9C]">P2P Taker Fee</div>
             </div>
             <div>
-              <div className="font-mono text-lg sm:text-2xl font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">110+</div>
-              <div className="mt-1 text-[11px] sm:text-xs text-slate-500 dark:text-[#848E9C]">Verified Merchants</div>
+              <div className="font-mono text-lg sm:text-2xl font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">440+</div>
+              <div className="mt-1 text-[11px] sm:text-xs text-slate-500 dark:text-[#848E9C]">Verified P2P Ads</div>
             </div>
             <div>
               <div className="font-mono text-lg sm:text-2xl font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">9.4%</div>
@@ -368,7 +368,7 @@ export const HomeView: React.FC = () => {
                     </div>
                   ) : null}
                   <div className="mt-1 text-xs text-slate-500 dark:text-[#848E9C]">
-                    {offer.paymentMethods.slice(0, 2).join(' · ')} · {formatFiat(offer.minLimit, offer.fiat)}–{formatFiat(offer.maxLimit, offer.fiat)}
+                    {offer.paymentMethods.slice(0, 2).join(' · ')} · {formatOrderLimit(offer.minLimit, offer.maxLimit, offer.fiat)}
                   </div>
                 </div>
               </div>

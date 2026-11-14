@@ -6,16 +6,27 @@ import { CryptoSymbol, FiatCurrency, PaymentMethodType } from '../../types/excha
 
 const ALL_PAYMENT_METHODS: PaymentMethodType[] = [
   'UPI',
+  'UPI QR Scan',
+  'UPI Lite',
   'Google Pay (GPay)',
   'PhonePe',
   'Paytm UPI',
   'BHIM UPI',
   'CRED Pay',
   'Amazon Pay UPI',
+  'WhatsApp Pay (UPI)',
+  'MobiKwik UPI',
+  'Freecharge UPI',
+  'SBI YONO Pay',
+  'HDFC PayZapp',
+  'ICICI iMobile Pay',
+  'Kotak 811',
+  'Airtel Payments Bank',
   'IMPS',
   'NEFT / RTGS',
   'Digital eRupee',
   'Paytm Wallet',
+  'Cash Deposit (CDM)',
   'Bank Transfer',
   'Wise',
   'Revolut',
@@ -33,14 +44,14 @@ export const PostAdModal: React.FC<{ open: boolean; onClose: () => void }> = ({ 
   const [fiat, setFiat] = useState<FiatCurrency>(defaultFiat);
   const [price, setPrice] = useState<string>(defaultFiat === 'INR' ? '104.25' : '1.002');
   const [availableAmount, setAvailableAmount] = useState<string>('2500');
-  const [minLimit, setMinLimit] = useState<string>(defaultFiat === 'INR' ? '5000' : '50');
-  const [maxLimit, setMaxLimit] = useState<string>(defaultFiat === 'INR' ? '100000' : '2500');
+  const [minLimit, setMinLimit] = useState<string>(defaultFiat === 'INR' ? '300' : '50');
+  const [maxLimit, setMaxLimit] = useState<string>(defaultFiat === 'INR' ? '50000' : '2500');
   const [selectedMethods, setSelectedMethods] = useState<PaymentMethodType[]>(
     defaultFiat === 'INR' ? ['UPI', 'Google Pay (GPay)', 'PhonePe', 'IMPS'] : ['Wise', 'Bank Transfer']
   );
   const [terms, setTerms] = useState<string>(
     defaultFiat === 'INR'
-      ? 'UPI / GPay / PhonePe / IMPS accepted 24x7 (₹5,000 – ₹1,00,000). PAN-verified accounts only.'
+      ? 'UPI / GPay / PhonePe / IMPS accepted 24x7 (300 INR to 50,000 INR). PAN-verified accounts only.'
       : 'Fast verification. Personal verified accounts only.'
   );
 
@@ -55,16 +66,16 @@ export const PostAdModal: React.FC<{ open: boolean; onClose: () => void }> = ({ 
   const handleAssetOrFiatChange = (nextAsset: CryptoSymbol, nextFiat: FiatCurrency) => {
     if (nextFiat === 'INR' && (nextAsset === 'USDT' || nextAsset === 'USDC')) {
       setPrice(merchantSide === 'SELL' ? '104.25' : '103.85');
-      setMinLimit('5000');
-      setMaxLimit('100000');
+      setMinLimit('300');
+      setMaxLimit('50000');
       return;
     }
     const usdPrice = markets.find((m) => m.symbol === nextAsset)?.price ?? 1;
     const rate = FIAT_RATES[nextFiat].rateFromUsd;
     setPrice((usdPrice * rate).toFixed(2));
     if (nextFiat === 'INR') {
-      setMinLimit('5000');
-      setMaxLimit('100000');
+      setMinLimit('300');
+      setMaxLimit('50000');
     }
   };
 

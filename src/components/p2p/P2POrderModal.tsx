@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ShieldCheck, X } from 'lucide-react';
 import { useExchange } from '../../context/ExchangeContext';
 import { P2POffer, P2POrder, PaymentMethodType } from '../../types/exchange';
-import { formatCrypto, formatFiat } from '../../utils/format';
+import { formatCrypto, formatFiat, formatOrderLimit } from '../../utils/format';
 import { CoinIcon } from '../CoinIcon';
 
 interface P2POrderModalProps {
@@ -107,10 +107,10 @@ export const P2POrderModal: React.FC<P2POrderModalProps> = ({ offer, onClose, on
                   {formatCrypto(offer.availableAmount, offer.asset)} {offer.asset}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500 dark:text-[#848E9C]">Limits</span>
-                <span className="font-mono text-slate-900 dark:text-[#EAECEF]">
-                  {formatFiat(offer.minLimit, offer.fiat)} – {formatFiat(offer.maxLimit, offer.fiat)}
+              <div className="flex justify-between gap-2">
+                <span className="text-slate-500 dark:text-[#848E9C] shrink-0">Limits</span>
+                <span className="font-mono text-slate-900 dark:text-[#EAECEF] text-right">
+                  {formatOrderLimit(offer.minLimit, offer.maxLimit, offer.fiat)}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -146,7 +146,7 @@ export const P2POrderModal: React.FC<P2POrderModalProps> = ({ offer, onClose, on
                   type="number"
                   step="any"
                   required
-                  placeholder={`${offer.minLimit} – ${offer.maxLimit}`}
+                  placeholder={formatOrderLimit(offer.minLimit, offer.maxLimit, offer.fiat)}
                   value={fiatInput}
                   onChange={(e) => setFiatInput(e.target.value)}
                   className="w-full px-3.5 py-2.5 pr-16 rounded-md border border-slate-200 dark:border-[#2B3139] bg-slate-50 dark:bg-[#0B0E11] font-mono text-sm text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"

@@ -53,7 +53,7 @@ interface PersistedState {
   paymentMethods: UserPaymentMethod[];
 }
 
-const STORAGE_KEY = 'vault_p2p_exchange_v4';
+const STORAGE_KEY = 'vault_p2p_exchange_v5';
 
 const DEMO_ACCOUNT: StoredAccount = {
   id: 'usr-demo',
@@ -147,7 +147,8 @@ function loadPersistedState(): PersistedState {
     const rawCurrent = localStorage.getItem(STORAGE_KEY);
     const rawLegacy = rawCurrent
       ? null
-      : (localStorage.getItem('vault_p2p_exchange_v3') ??
+      : (localStorage.getItem('vault_p2p_exchange_v4') ??
+        localStorage.getItem('vault_p2p_exchange_v3') ??
         localStorage.getItem('vault_p2p_exchange_v2') ??
         localStorage.getItem('vault_p2p_exchange_v1'));
     const raw = rawCurrent ?? rawLegacy;
@@ -157,15 +158,33 @@ function loadPersistedState(): PersistedState {
       let mergedOffers: P2POffer[];
       if (rawCurrent && existingOffers.length > 0) {
         const existingIds = new Set(existingOffers.map((o) => o.id));
-        mergedOffers = [...existingOffers, ...INITIAL_P2P_OFFERS.filter((o) => !existingIds.has(o.id))];
+        const initialById = new Map(INITIAL_P2P_OFFERS.map((o) => [o.id, o]));
+        mergedOffers = [
+          ...existingOffers.map((o) => {
+            if (o.isUserAd) return o;
+            const fresh = initialById.get(o.id);
+            return fresh
+              ? {
+                  ...o,
+                  merchantName: fresh.merchantName,
+                  bio: fresh.bio,
+                  paymentMethods: fresh.paymentMethods,
+                  minLimit: fresh.minLimit,
+                  maxLimit: fresh.maxLimit,
+                  terms: fresh.terms,
+                }
+              : o;
+          }),
+          ...INITIAL_P2P_OFFERS.filter((o) => !existingIds.has(o.id)),
+        ];
       } else {
-        // When upgrading from v1/v2/v3, keep any custom user ads and load fresh INITIAL_P2P_OFFERS
+        // When upgrading from v1-v4, keep any custom user ads and load fresh INITIAL_P2P_OFFERS
         const customUserAds = existingOffers.filter((o) => o.isUserAd);
         mergedOffers = [...customUserAds, ...INITIAL_P2P_OFFERS];
       }
       return {
         theme: parsed.theme === 'light' ? 'light' : 'dark',
-        fiat: parsed.fiat && FIAT_RATES[parsed.fiat] ? parsed.fiat : 'INR',
+        fiat: rawCurrent && parsed.fiat && FIAT_RATES[parsed.fiat] ? parsed.fiat : 'INR',
         hideBalances: Boolean(parsed.hideBalances),
         currentUser: parsed.currentUser !== undefined ? parsed.currentUser : null,
         accounts: parsed.accounts && parsed.accounts.length > 0 ? parsed.accounts : [DEMO_ACCOUNT],

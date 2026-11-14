@@ -60,6 +60,13 @@ export function formatFiat(amount: number, fiat: FiatCurrency): string {
   })}`;
 }
 
+export function formatOrderLimit(min: number, max: number, fiat: FiatCurrency): string {
+  const locale = fiat === 'INR' ? 'en-IN' : 'en-US';
+  const minStr = min.toLocaleString(locale, { maximumFractionDigits: 2 });
+  const maxStr = max.toLocaleString(locale, { maximumFractionDigits: 2 });
+  return `${minStr} ${fiat} to ${maxStr} ${fiat}`;
+}
+
 export function formatTimeAgo(timestamp: number): string {
   const diff = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
   if (diff < 60) return `${diff}s ago`;

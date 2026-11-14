@@ -1,9 +1,24 @@
 import React, { useMemo, useState } from 'react';
-import { Plus, RefreshCw, Search, ShieldCheck, Star, Trash2, X } from 'lucide-react';
+import {
+  ChevronRight,
+  Clock,
+  Gem,
+  Lock,
+  Plus,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  SlidersHorizontal,
+  Star,
+  ThumbsUp,
+  Trash2,
+  X,
+  Zap,
+} from 'lucide-react';
 import { useExchange } from '../context/ExchangeContext';
 import { FIAT_RATES } from '../data/seedData';
 import { CryptoSymbol, FiatCurrency, P2POffer, P2POrder, PaymentMethodType } from '../types/exchange';
-import { formatCrypto, formatFiat, formatTimeAgo } from '../utils/format';
+import { formatCrypto, formatFiat, formatOrderLimit, formatTimeAgo } from '../utils/format';
 import { CoinIcon } from '../components/CoinIcon';
 import { P2POrderModal } from '../components/p2p/P2POrderModal';
 import { P2PTradeRoomModal } from '../components/p2p/P2PTradeRoomModal';
@@ -13,16 +28,27 @@ const P2P_ASSETS: CryptoSymbol[] = ['USDT', 'BTC', 'ETH', 'BNB', 'SOL', 'USDC'];
 const P2P_PAYMENTS: ('ALL' | PaymentMethodType)[] = [
   'ALL',
   'UPI',
+  'UPI QR Scan',
+  'UPI Lite',
   'Google Pay (GPay)',
   'PhonePe',
   'Paytm UPI',
   'BHIM UPI',
   'CRED Pay',
   'Amazon Pay UPI',
+  'WhatsApp Pay (UPI)',
+  'MobiKwik UPI',
+  'Freecharge UPI',
+  'SBI YONO Pay',
+  'HDFC PayZapp',
+  'ICICI iMobile Pay',
+  'Kotak 811',
+  'Airtel Payments Bank',
   'IMPS',
   'NEFT / RTGS',
   'Digital eRupee',
   'Paytm Wallet',
+  'Cash Deposit (CDM)',
   'Bank Transfer',
   'Wise',
   'Revolut',
@@ -30,6 +56,35 @@ const P2P_PAYMENTS: ('ALL' | PaymentMethodType)[] = [
   'Zelle',
   'Faster Payments',
   'PayPal',
+];
+
+const QUICK_PAYMENT_RAILS: ('ALL' | PaymentMethodType)[] = [
+  'ALL',
+  'UPI',
+  'Paytm UPI',
+  'PhonePe',
+  'Google Pay (GPay)',
+  'Paytm Wallet',
+  'UPI QR Scan',
+  'UPI Lite',
+  'BHIM UPI',
+  'CRED Pay',
+  'Amazon Pay UPI',
+  'WhatsApp Pay (UPI)',
+  'MobiKwik UPI',
+  'Freecharge UPI',
+  'SBI YONO Pay',
+  'HDFC PayZapp',
+  'ICICI iMobile Pay',
+  'Kotak 811',
+  'Airtel Payments Bank',
+  'IMPS',
+  'NEFT / RTGS',
+  'Digital eRupee',
+  'Cash Deposit (CDM)',
+  'Bank Transfer',
+  'Wise',
+  'Zelle',
 ];
 
 export const P2PView: React.FC = () => {
@@ -47,7 +102,7 @@ export const P2PView: React.FC = () => {
     currentUser,
   } = useExchange();
 
-  const [subTab, setSubTab] = useState<'marketplace' | 'orders' | 'my-ads' | 'payments'>('marketplace');
+  const [subTab, setSubTab] = useState<'marketplace' | 'profiles' | 'orders' | 'my-ads' | 'payments'>('marketplace');
   const [userSide, setUserSide] = useState<'BUY' | 'SELL'>('BUY');
   const [selectedAsset, setSelectedAsset] = useState<CryptoSymbol>('USDT');
   const [amountFilter, setAmountFilter] = useState<string>('');
@@ -57,6 +112,11 @@ export const P2PView: React.FC = () => {
   const [sortBy, setSortBy] = useState<'price' | 'orders' | 'completion'>('price');
   const [page, setPage] = useState<number>(1);
   const [showAllRows, setShowAllRows] = useState<boolean>(false);
+  const [filtersExpanded, setFiltersExpanded] = useState<boolean>(false);
+  const [beginnerOnly, setBeginnerOnly] = useState<boolean>(false);
+  const [profileRoleFilter, setProfileRoleFilter] = useState<'ALL' | 'SELL' | 'BUY'>('ALL');
+  const [profilePage, setProfilePage] = useState<number>(1);
+  const [showAllProfiles, setShowAllProfiles] = useState<boolean>(false);
 
   const [selectedOffer, setSelectedOffer] = useState<P2POffer | null>(null);
   const [profileOffer, setProfileOffer] = useState<P2POffer | null>(null);
@@ -87,6 +147,7 @@ export const P2PView: React.FC = () => {
       if (offer.fiat !== fiat) return false;
       if (offer.availableAmount <= 0) return false;
       if (verifiedOnly && !offer.isVerified) return false;
+      if (beginnerOnly && (!offer.isVerified || offer.completionRate < 99 || offer.minLimit > 1000)) return false;
       if (paymentFilter !== 'ALL' && !offer.paymentMethods.includes(paymentFilter)) return false;
       if (Number.isFinite(amt) && amt > 0) {
         if (amt < offer.minLimit || amt > offer.maxLimit) return false;
@@ -103,9 +164,21 @@ export const P2PView: React.FC = () => {
       if (sortBy === 'completion') return b.completionRate - a.completionRate;
       return userSide === 'BUY' ? a.price - b.price : b.price - a.price;
     });
-  }, [p2pOffers, targetMerchantSide, selectedAsset, fiat, verifiedOnly, paymentFilter, amountFilter, merchantSearch, sortBy, userSide]);
+  }, [p2pOffers, targetMerchantSide, selectedAsset, fiat, verifiedOnly, beginnerOnly, paymentFilter, amountFilter, merchantSearch, sortBy, userSide]);
 
-  const PAGE_SIZE = 20;
+  const { buyAdsCount, sellAdsCount } = useMemo(() => {
+    let buyCount = 0;
+    let sellCount = 0;
+    for (const o of p2pOffers) {
+      if (o.asset === selectedAsset && o.fiat === fiat && o.availableAmount > 0) {
+        if (o.merchantSide === 'SELL') buyCount += 1;
+        else sellCount += 1;
+      }
+    }
+    return { buyAdsCount: buyCount, sellAdsCount: sellCount };
+  }, [p2pOffers, selectedAsset, fiat]);
+
+  const PAGE_SIZE = 60;
   const totalPages = Math.max(1, Math.ceil(filteredOffers.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const displayedOffers = useMemo(() => {
@@ -115,6 +188,40 @@ export const P2PView: React.FC = () => {
   }, [filteredOffers, showAllRows, safePage]);
 
   const userAds = useMemo(() => p2pOffers.filter((o) => o.isUserAd), [p2pOffers]);
+
+  const fiatProfiles = useMemo(
+    () => p2pOffers.filter((o) => o.fiat === fiat && o.availableAmount > 0),
+    [p2pOffers, fiat]
+  );
+
+  const filteredProfiles = useMemo(() => {
+    const q = merchantSearch.trim().toLowerCase();
+    const list = fiatProfiles.filter((offer) => {
+      if (profileRoleFilter !== 'ALL' && offer.merchantSide !== profileRoleFilter) return false;
+      if (verifiedOnly && !offer.isVerified) return false;
+      if (paymentFilter !== 'ALL' && !offer.paymentMethods.includes(paymentFilter)) return false;
+      if (q) {
+        const hay = `${offer.merchantName} ${offer.location ?? ''} ${offer.bio ?? ''}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+
+    return [...list].sort((a, b) => {
+      if (sortBy === 'completion') return b.completionRate - a.completionRate;
+      if (sortBy === 'price') return a.price - b.price;
+      return b.completedOrders - a.completedOrders;
+    });
+  }, [fiatProfiles, profileRoleFilter, verifiedOnly, paymentFilter, merchantSearch, sortBy]);
+
+  const PROFILE_PAGE_SIZE = 60;
+  const totalProfilePages = Math.max(1, Math.ceil(filteredProfiles.length / PROFILE_PAGE_SIZE));
+  const safeProfilePage = Math.min(profilePage, totalProfilePages);
+  const displayedProfiles = useMemo(() => {
+    if (showAllProfiles) return filteredProfiles;
+    const start = (safeProfilePage - 1) * PROFILE_PAGE_SIZE;
+    return filteredProfiles.slice(start, start + PROFILE_PAGE_SIZE);
+  }, [filteredProfiles, showAllProfiles, safeProfilePage]);
 
   const handleAddPm = (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,6 +266,7 @@ export const P2PView: React.FC = () => {
             {(
               [
                 { id: 'marketplace', label: 'P2P Market' },
+                { id: 'profiles', label: `Profiles (${fiatProfiles.length})` },
                 { id: 'orders', label: activeOrdersCount > 0 ? `Orders (${activeOrdersCount})` : `Orders (${p2pOrders.length})` },
                 { id: 'my-ads', label: `My Ads (${userAds.length})` },
                 { id: 'payments', label: 'Payment Methods' },
@@ -191,418 +299,603 @@ export const P2PView: React.FC = () => {
       </div>
 
       {subTab === 'marketplace' && (
-        <>
-          {/* Filter Bar */}
-          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3">
-              {/* Buy / Sell Segmented Switch */}
-              <div className="grid grid-cols-2 sm:inline-flex p-1 rounded-md bg-slate-100 dark:bg-[#181A20] border border-slate-200 dark:border-[#2B3139] w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={() => setUserSide('BUY')}
-                  className={`px-4 py-1.5 rounded text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer text-center ${
-                    userSide === 'BUY'
-                      ? 'bg-[#0ECB81] text-[#0B0E11]'
-                      : 'text-slate-600 dark:text-[#848E9C] hover:text-slate-900 dark:hover:text-[#EAECEF]'
-                  }`}
-                >
-                  Buy Crypto
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setUserSide('SELL')}
-                  className={`px-4 py-1.5 rounded text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer text-center ${
-                    userSide === 'SELL'
-                      ? 'bg-[#F6465D] text-white'
-                      : 'text-slate-600 dark:text-[#848E9C] hover:text-slate-900 dark:hover:text-[#EAECEF]'
-                  }`}
-                >
-                  Sell Crypto
-                </button>
-              </div>
-
-              {/* Crypto Tabs */}
-              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar w-full sm:w-auto">
-                {P2P_ASSETS.map((sym) => (
-                  <button
-                    key={sym}
-                    type="button"
-                    onClick={() => setSelectedAsset(sym)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                      selectedAsset === sym
-                        ? 'bg-slate-900 text-white dark:bg-[#2B3139] dark:text-[#F0B90B]'
-                        : 'text-slate-600 dark:text-[#848E9C] hover:bg-slate-100 dark:hover:bg-[#181A20]'
-                    }`}
-                  >
-                    {sym}
-                  </button>
-                ))}
-              </div>
+        <div className="space-y-3.5">
+          {/* Binance-Style Top Control Strip: Buy/Sell Toggle + Filter Button */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="inline-flex p-0.5 rounded-lg border border-slate-300 dark:border-[#2B3139] bg-slate-100 dark:bg-[#0B0E11]">
+              <button
+                type="button"
+                onClick={() => {
+                  setUserSide('BUY');
+                  setPage(1);
+                }}
+                className={`px-6 sm:px-8 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer tabular-nums ${
+                  userSide === 'BUY'
+                    ? 'bg-white dark:bg-[#2B3139] text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 dark:text-[#848E9C] hover:text-slate-900 dark:hover:text-[#EAECEF]'
+                }`}
+              >
+                Buy <span className="text-[11px] font-mono text-[#0ECB81] ml-0.5">({buyAdsCount})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setUserSide('SELL');
+                  setPage(1);
+                }}
+                className={`px-6 sm:px-8 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer tabular-nums ${
+                  userSide === 'SELL'
+                    ? 'bg-white dark:bg-[#2B3139] text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 dark:text-[#848E9C] hover:text-slate-900 dark:hover:text-[#EAECEF]'
+                }`}
+              >
+                Sell <span className="text-[11px] font-mono text-[#F6465D] ml-0.5">({sellAdsCount})</span>
+              </button>
             </div>
 
-            {/* Amount, Merchant Search, Fiat, Payment, Verified Filters */}
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5">
-              <div className="relative">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <div className="flex items-center gap-2">
+              {fiat === 'INR' && (
+                <button
+                  type="button"
+                  onClick={randomizeP2PRates}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] hover:border-[#F0B90B] text-xs font-medium text-slate-700 dark:text-[#EAECEF] whitespace-nowrap shrink-0 cursor-pointer"
+                  title="Refresh live Buy & Sell INR rates"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-[#F0B90B]" />
+                  <span className="hidden sm:inline">Refresh Rates</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setFiltersExpanded((f) => !f)}
+                className="relative p-2 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] hover:border-[#F0B90B] text-slate-700 dark:text-[#EAECEF] cursor-pointer"
+                aria-label="Toggle extra filters"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                {(verifiedOnly || beginnerOnly || merchantSearch.trim() !== '' || paymentFilter !== 'ALL' || sortBy !== 'price') && (
+                  <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#F0B90B]" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Binance-Style Asset Selector + Transaction Amount & Fiat Input Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <div className="flex items-center gap-2">
+              <div className="relative flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-[#1E2329] border border-slate-200 dark:border-[#2B3139] shrink-0">
+                <CoinIcon symbol={selectedAsset} size={20} />
+                <select
+                  aria-label="Select crypto asset"
+                  value={selectedAsset}
+                  onChange={(e) => {
+                    setSelectedAsset(e.target.value as CryptoSymbol);
+                    setPage(1);
+                  }}
+                  className="bg-transparent text-xs sm:text-sm font-semibold text-slate-900 dark:text-[#EAECEF] focus:outline-none cursor-pointer pr-1"
+                >
+                  {P2P_ASSETS.map((sym) => (
+                    <option key={sym} value={sym} className="bg-white dark:bg-[#181A20] text-slate-900 dark:text-[#EAECEF]">
+                      {sym}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Combined Transaction Amount + INR Fiat Box */}
+              <div className="flex-1 sm:w-80 flex items-center rounded-lg bg-slate-100 dark:bg-[#1E2329] border border-slate-200 dark:border-[#2B3139] overflow-hidden focus-within:border-[#F0B90B]">
                 <input
                   type="number"
-                  placeholder={`Amount (${fiat})`}
+                  placeholder="Transaction amount"
                   value={amountFilter}
                   onChange={(e) => {
                     setAmountFilter(e.target.value);
                     setPage(1);
                   }}
-                  className="w-full sm:w-36 pl-8 pr-2.5 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] font-mono text-xs text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
+                  className="flex-1 min-w-0 bg-transparent px-3 py-2 text-xs sm:text-sm text-slate-900 dark:text-[#EAECEF] placeholder:text-slate-400 dark:placeholder:text-[#848E9C] focus:outline-none font-mono"
+                />
+                <div className="flex items-center gap-1.5 pl-2.5 pr-2.5 py-1.5 border-l border-slate-300 dark:border-[#2B3139] shrink-0">
+                  <span className="w-5 h-5 rounded-full bg-[#F0B90B] text-[#0B0E11] text-[11px] font-bold flex items-center justify-center shrink-0">
+                    {FIAT_RATES[fiat].symbol}
+                  </span>
+                  <select
+                    aria-label="Fiat currency"
+                    value={fiat}
+                    onChange={(e) => {
+                      setFiat(e.target.value as FiatCurrency);
+                      setPage(1);
+                      setProfilePage(1);
+                    }}
+                    className="bg-transparent text-xs sm:text-sm font-semibold text-slate-900 dark:text-[#EAECEF] focus:outline-none cursor-pointer"
+                  >
+                    {(Object.keys(FIAT_RATES) as FiatCurrency[]).map((f) => (
+                      <option key={f} value={f} className="bg-white dark:bg-[#181A20] text-slate-900 dark:text-[#EAECEF]">
+                        {f}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Beginner Friendly Chip + Search/Sort on desktop */}
+            <div className="flex items-center gap-2 flex-1 justify-between sm:justify-end">
+              {userSide === 'BUY' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBeginnerOnly((b) => !b);
+                    setPage(1);
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                    beginnerOnly
+                      ? 'border-[#F0B90B] bg-[#F0B90B]/15 text-[#F0B90B]'
+                      : 'border-slate-300 dark:border-[#363C45] bg-white dark:bg-[#181A20] text-slate-700 dark:text-[#EAECEF] hover:border-[#F0B90B]'
+                  }`}
+                >
+                  <Zap className="w-3.5 h-3.5 text-[#F6465D] fill-[#F6465D]" />
+                  <span>Beginner Friendly Ads</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+              )}
+
+              <div className="hidden lg:flex items-center gap-2">
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search merchant or city..."
+                    value={merchantSearch}
+                    onChange={(e) => {
+                      setMerchantSearch(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-44 pl-8 pr-3 py-2 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-xs text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
+                  />
+                </div>
+                <select
+                  aria-label="Sort offers"
+                  value={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value as 'price' | 'orders' | 'completion');
+                    setPage(1);
+                  }}
+                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-xs text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
+                >
+                  <option value="price">Best Price</option>
+                  <option value="orders">Most Orders</option>
+                  <option value="completion">Highest Completion</option>
+                </select>
+                <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-xs text-slate-700 dark:text-[#EAECEF] cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={verifiedOnly}
+                    onChange={(e) => {
+                      setVerifiedOnly(e.target.checked);
+                      setPage(1);
+                    }}
+                    className="accent-[#F0B90B]"
+                  />
+                  <span>Verified Only</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Expandable Extra Filter Drawer (Mobile & Tablet, or when Filter Icon toggled) */}
+          {filtersExpanded && (
+            <div className="p-3 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-slate-50 dark:bg-[#181A20] grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search merchant or city..."
+                  value={merchantSearch}
+                  onChange={(e) => {
+                    setMerchantSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full pl-8 pr-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#0B0E11] text-xs text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
                 />
               </div>
-
-              <input
-                type="text"
-                placeholder="Search merchant or city..."
-                value={merchantSearch}
-                onChange={(e) => {
-                  setMerchantSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full sm:w-44 px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-xs text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
-              />
-
-              <select
-                aria-label="Fiat currency"
-                value={fiat}
-                onChange={(e) => setFiat(e.target.value as FiatCurrency)}
-                className="w-full sm:w-auto px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-xs font-semibold text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
-              >
-                {(Object.keys(FIAT_RATES) as FiatCurrency[]).map((f) => (
-                  <option key={f} value={f}>{f}</option>
-                ))}
-              </select>
-
               <select
                 aria-label="Payment method filter"
                 value={paymentFilter}
-                onChange={(e) => setPaymentFilter(e.target.value as 'ALL' | PaymentMethodType)}
-                className="w-full sm:w-auto px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-xs text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
+                onChange={(e) => {
+                  setPaymentFilter(e.target.value as 'ALL' | PaymentMethodType);
+                  setPage(1);
+                }}
+                className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#0B0E11] text-xs text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
               >
                 {P2P_PAYMENTS.map((pm) => (
                   <option key={pm} value={pm}>{pm === 'ALL' ? 'All Payment Methods' : pm}</option>
                 ))}
               </select>
-
               <select
-                aria-label="Sort offers"
+                aria-label="Sort offers drawer"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'price' | 'orders' | 'completion')}
-                className="w-full sm:w-auto px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-xs text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
+                onChange={(e) => {
+                  setSortBy(e.target.value as 'price' | 'orders' | 'completion');
+                  setPage(1);
+                }}
+                className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#0B0E11] text-xs text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
               >
                 <option value="price">Best Price</option>
                 <option value="orders">Most Orders</option>
                 <option value="completion">Highest Completion</option>
               </select>
-
-              <label className="w-full sm:w-auto inline-flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-xs text-slate-700 dark:text-[#EAECEF] cursor-pointer select-none">
+              <label className="w-full inline-flex items-center justify-between px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#0B0E11] text-xs text-slate-700 dark:text-[#EAECEF] cursor-pointer select-none">
+                <span>Verified Merchants Only</span>
                 <input
                   type="checkbox"
                   checked={verifiedOnly}
-                  onChange={(e) => setVerifiedOnly(e.target.checked)}
+                  onChange={(e) => {
+                    setVerifiedOnly(e.target.checked);
+                    setPage(1);
+                  }}
                   className="accent-[#F0B90B]"
                 />
-                <span>Verified Only</span>
               </label>
-
-              {fiat === 'INR' && (
-                <button
-                  type="button"
-                  onClick={randomizeP2PRates}
-                  className="col-span-2 sm:col-span-1 w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] hover:border-[#F0B90B] text-xs font-semibold text-slate-700 dark:text-[#EAECEF] whitespace-nowrap shrink-0 cursor-pointer"
-                  title="Refresh live Buy & Sell USDT rates"
-                >
-                  <RefreshCw className="w-3.5 h-3.5 text-[#F0B90B]" />
-                  <span>Refresh Rates</span>
-                </button>
-              )}
             </div>
+          )}
+
+          {/* Quick UPI & Payment Rail Filter Bar */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+            {QUICK_PAYMENT_RAILS.map((pm) => {
+              const active = paymentFilter === pm;
+              return (
+                <button
+                  key={`qpm-${pm}`}
+                  type="button"
+                  onClick={() => {
+                    setPaymentFilter(pm);
+                    setPage(1);
+                  }}
+                  className={`px-2.5 py-1.5 rounded-md border text-[11px] font-medium whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                    active
+                      ? 'border-[#F0B90B] bg-[#F0B90B]/15 text-slate-900 dark:text-[#F0B90B] font-semibold'
+                      : 'border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-slate-600 dark:text-[#848E9C] hover:border-[#F0B90B]/60 hover:text-slate-900 dark:hover:text-[#EAECEF]'
+                  }`}
+                >
+                  {pm === 'ALL' ? 'All Payment Rails' : pm}
+                </button>
+              );
+            })}
           </div>
 
-          {/* P2P Offers Container */}
-          <div className="rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] overflow-hidden">
-            {/* Mobile App Offer Cards */}
-            <div className="md:hidden divide-y divide-slate-200 dark:divide-[#2B3139]">
-              {filteredOffers.length === 0 ? (
-                <div className="py-12 px-4 text-center space-y-2">
-                  <p className="text-sm font-medium text-slate-900 dark:text-[#EAECEF]">
-                    No {userSide === 'BUY' ? 'sellers' : 'buyers'} match your current {selectedAsset}/{fiat} filters.
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-[#848E9C]">
-                    Try switching fiat currency, clearing the amount filter, or posting your own P2P Ad.
-                  </p>
-                  <div className="pt-2">
+          {/* P2P Offers Feed */}
+          <div className="space-y-3">
+            {filteredOffers.length > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs px-1">
+                <span className="text-slate-500 dark:text-[#848E9C] tabular-nums">
+                  Showing <strong className="text-slate-900 dark:text-[#EAECEF]">{displayedOffers.length}</strong> of{' '}
+                  <strong className="text-slate-900 dark:text-[#EAECEF]">{filteredOffers.length}</strong>{' '}
+                  {userSide === 'BUY' ? 'Buy' : 'Sell'} {selectedAsset}/{fiat} Ads
+                </span>
+                {filteredOffers.length > PAGE_SIZE && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllRows((s) => !s)}
+                    className="text-xs font-semibold text-[#F0B90B] hover:underline cursor-pointer"
+                  >
+                    {showAllRows ? `Paginate (${PAGE_SIZE}/page)` : `View All ${filteredOffers.length} Ads`}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {filteredOffers.length === 0 ? (
+              <div className="rounded-xl border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] py-14 px-6 text-center space-y-2">
+                <p className="text-sm font-medium text-slate-900 dark:text-[#EAECEF]">
+                  No {userSide === 'BUY' ? 'sellers' : 'buyers'} match your current {selectedAsset}/{fiat} filters.
+                </p>
+                <p className="text-xs text-slate-500 dark:text-[#848E9C]">
+                  Try switching fiat currency, clearing the transaction amount, or resetting filters.
+                </p>
+                <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAmountFilter('');
+                      setMerchantSearch('');
+                      setPaymentFilter('ALL');
+                      setVerifiedOnly(false);
+                      setBeginnerOnly(false);
+                      setPage(1);
+                    }}
+                    className="px-4 py-2 rounded-lg border border-slate-200 dark:border-[#2B3139] text-xs font-semibold text-slate-700 dark:text-[#EAECEF] hover:border-[#F0B90B] cursor-pointer"
+                  >
+                    Reset Filters
+                  </button>
+                  {fiat !== 'INR' && (
                     <button
                       type="button"
                       onClick={() => {
-                        setAmountFilter('');
-                        setMerchantSearch('');
-                        setPaymentFilter('ALL');
-                        setVerifiedOnly(false);
+                        setFiat('INR');
                         setPage(1);
+                        setProfilePage(1);
                       }}
-                      className="px-3.5 py-1.5 rounded-md border border-slate-200 dark:border-[#2B3139] text-xs font-semibold text-slate-700 dark:text-[#EAECEF] hover:border-[#F0B90B] cursor-pointer"
+                      className="px-4 py-2 rounded-lg bg-[#F0B90B] hover:bg-[#D9A708] text-xs font-semibold text-[#0B0E11] cursor-pointer"
                     >
-                      Reset Filters
+                      Switch to INR (₹)
                     </button>
-                  </div>
+                  )}
                 </div>
-              ) : (
-                displayedOffers.map((offer) => {
-                  const initials = offer.merchantName.slice(0, 2).toUpperCase();
-                  const ratingVal = offer.rating ?? 4.9;
-                  const reviewsTotal = offer.reviewsCount ?? Math.max(40, Math.round(offer.completedOrders * 0.3));
+              </div>
+            ) : (
+              <>
+                {/* Featured Ad Card (Top Match) */}
+                {displayedOffers[0] && (() => {
+                  const featured = displayedOffers[0];
+                  const initials = featured.merchantName.slice(0, 1).toUpperCase();
+                  const positivePct = (featured.positiveRate ?? featured.completionRate).toFixed(2);
+                  const completionPct = featured.completionRate.toFixed(2);
+                  const fiatSymbol = FIAT_RATES[featured.fiat].symbol;
+                  const priceDecimals = featured.price < 10 ? 3 : 2;
+                  const formattedPrice = featured.price.toLocaleString('en-IN', {
+                    minimumFractionDigits: priceDecimals,
+                    maximumFractionDigits: priceDecimals,
+                  });
+                  const getBarColor = (pm: PaymentMethodType) => {
+                    if (pm.includes('IMPS') || pm.includes('NEFT') || pm.includes('Bank') || pm.includes('Cash') || pm.includes('Wise')) {
+                      return 'bg-[#F0B90B]';
+                    }
+                    if (pm.includes('Paytm') || pm.includes('eRupee') || pm.includes('SBI') || pm.includes('HDFC') || pm.includes('ICICI') || pm.includes('Kotak')) {
+                      return 'bg-[#3B82F6]';
+                    }
+                    return 'bg-[#F97316]';
+                  };
                   return (
-                    <div key={`m-${offer.id}`} className="p-3.5 space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <button
-                            type="button"
-                            onClick={() => setProfileOffer(offer)}
-                            className="w-8 h-8 rounded-md bg-slate-100 dark:bg-[#2B3139] border border-slate-200 dark:border-[#363C45] flex items-center justify-center font-display text-xs font-bold text-[#F0B90B] shrink-0 cursor-pointer"
-                          >
-                            {initials}
-                          </button>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1">
-                              <button
-                                type="button"
-                                onClick={() => setProfileOffer(offer)}
-                                className="font-semibold text-sm text-slate-900 dark:text-[#EAECEF] truncate cursor-pointer"
-                              >
-                                {offer.merchantName}
-                              </button>
-                              {offer.isVerified && <ShieldCheck className="w-3.5 h-3.5 text-[#F0B90B] shrink-0" />}
-                            </div>
-                            <div className="text-[11px] text-slate-500 dark:text-[#848E9C] tabular-nums truncate">
-                              {offer.completedOrders.toLocaleString('en-IN')} trades · {offer.completionRate}% ·{' '}
-                              <span className="text-[#F0B90B]">{ratingVal.toFixed(1)}★ ({reviewsTotal})</span>
-                            </div>
+                    <div className="space-y-2">
+                      <div className="text-sm font-bold text-slate-900 dark:text-white px-0.5">Featured Ad</div>
+                      <div className="rounded-xl border border-slate-200 dark:border-[#2B3139] bg-slate-50 dark:bg-[#1E2329] p-4 sm:p-5 space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <button
+                              type="button"
+                              onClick={() => setProfileOffer(featured)}
+                              className="relative w-7 h-7 rounded-full bg-slate-900 text-white dark:bg-[#EAECEF] dark:text-[#0B0E11] flex items-center justify-center text-xs font-bold shrink-0 cursor-pointer"
+                            >
+                              {initials}
+                              <span
+                                className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-slate-50 dark:ring-[#1E2329] ${
+                                  featured.isOnline ? 'bg-[#0ECB81]' : 'bg-slate-400'
+                                }`}
+                              />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setProfileOffer(featured)}
+                              className="px-2 py-0.5 rounded bg-slate-200/70 dark:bg-[#2B3139] text-sm font-semibold text-slate-900 dark:text-[#EAECEF] hover:text-[#F0B90B] truncate cursor-pointer"
+                            >
+                              {featured.merchantName}
+                            </button>
+                            {featured.isVerified && (
+                              <span className="inline-flex items-center gap-1 shrink-0">
+                                <Lock className="w-3.5 h-3.5 text-[#F0B90B]" />
+                                <Gem className="w-3.5 h-3.5 text-[#8B5CF6]" />
+                              </span>
+                            )}
                           </div>
-                        </div>
-
-                        <div className="text-right shrink-0">
-                          <div className="font-mono text-base font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">
-                            {formatFiat(offer.price, offer.fiat)}
-                          </div>
-                          {offer.quoteBuyPrice && offer.quoteSellPrice ? (
-                            <div className="font-mono text-[10px] tabular-nums">
-                              <span className="text-[#0ECB81]">B {formatFiat(offer.quoteBuyPrice, offer.fiat)}</span>
-                              {' / '}
-                              <span className="text-[#F6465D]">S {formatFiat(offer.quoteSellPrice, offer.fiat)}</span>
+                          {featured.quoteBuyPrice && featured.quoteSellPrice && (
+                            <div className="font-mono text-[11px] text-slate-500 dark:text-[#848E9C] tabular-nums">
+                              Buy {formatFiat(featured.quoteBuyPrice, featured.fiat)} · Sell {formatFiat(featured.quoteSellPrice, featured.fiat)}
                             </div>
-                          ) : (
-                            <div className="text-[10px] text-slate-500 dark:text-[#848E9C]">per {offer.asset}</div>
                           )}
                         </div>
-                      </div>
 
-                      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-[#848E9C] tabular-nums">
-                        <div>
-                          Avail: <span className="font-mono text-slate-900 dark:text-[#EAECEF] font-medium">{formatCrypto(offer.availableAmount, offer.asset)} {offer.asset}</span>
+                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-500 dark:text-[#848E9C] tabular-nums">
+                          <span>{featured.completedOrders.toLocaleString('en-IN')} orders</span>
+                          <span>|</span>
+                          <span>{completionPct}% completion</span>
+                          <span>|</span>
+                          <span className="inline-flex items-center gap-1">
+                            <ThumbsUp className="w-3 h-3" />
+                            {positivePct}%
+                          </span>
+                          <span>|</span>
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {featured.paymentWindowMinutes} min
+                          </span>
                         </div>
-                        <div>
-                          Limit: <span className="font-mono text-slate-800 dark:text-[#EAECEF]">{formatFiat(offer.minLimit, offer.fiat)}–{formatFiat(offer.maxLimit, offer.fiat)}</span>
-                        </div>
-                      </div>
 
-                      <div className="flex items-center justify-between gap-2 pt-1">
-                        <div className="text-[11px] text-slate-600 dark:text-[#848E9C] truncate">
-                          {offer.paymentMethods.join(' · ')}
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => setProfileOffer(offer)}
-                            className="px-2.5 py-1.5 rounded-md border border-slate-200 dark:border-[#2B3139] text-[11px] font-medium text-slate-600 dark:text-[#848E9C] cursor-pointer"
-                          >
-                            Profile
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedOffer(offer)}
-                            className={`px-3.5 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap cursor-pointer ${
-                              userSide === 'BUY'
-                                ? 'bg-[#0ECB81] hover:bg-[#0BB574] text-[#0B0E11]'
-                                : 'bg-[#F6465D] hover:bg-[#DF3B51] text-white'
-                            }`}
-                          >
-                            {userSide === 'BUY' ? `Buy ${offer.asset}` : `Sell ${offer.asset}`}
-                          </button>
+                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+                          <div className="space-y-1.5">
+                            <div className="flex items-baseline gap-1 font-mono tabular-nums">
+                              <span className="text-sm font-semibold text-slate-800 dark:text-[#EAECEF]">{fiatSymbol}</span>
+                              <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{formattedPrice}</span>
+                            </div>
+
+                            <div className="text-xs text-slate-600 dark:text-[#848E9C] tabular-nums space-y-1">
+                              <div>
+                                Available:{' '}
+                                <span className="font-mono text-slate-900 dark:text-[#EAECEF] font-medium">
+                                  {formatCrypto(featured.availableAmount, featured.asset)} {featured.asset}
+                                </span>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <span className="w-16 shrink-0">Order Limit:</span>
+                                <span className="font-mono text-slate-900 dark:text-[#EAECEF]">
+                                  {formatOrderLimit(featured.minLimit, featured.maxLimit, featured.fiat)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-end justify-between sm:justify-end gap-3 pt-1">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-700 dark:text-[#EAECEF]">
+                              {featured.paymentMethods.slice(0, 4).map((pm) => (
+                                <span key={pm} className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                                  <span className={`w-[3px] h-3 rounded-full ${getBarColor(pm)}`} />
+                                  <span>{pm}</span>
+                                </span>
+                              ))}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => setSelectedOffer(featured)}
+                              className={`px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                                userSide === 'BUY'
+                                  ? 'bg-[#0ECB81] hover:bg-[#0BB574] text-white'
+                                  : 'bg-[#F6465D] hover:bg-[#DF3B51] text-white'
+                              }`}
+                            >
+                              {userSide === 'BUY' ? `Buy ${featured.asset}` : `Sell ${featured.asset}`}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   );
-                })
-              )}
-            </div>
+                })()}
 
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200 dark:border-[#2B3139] text-xs font-medium text-slate-500 dark:text-[#848E9C]">
-                    <th className="py-3.5 px-5">{userSide === 'BUY' ? 'Seller' : 'Buyer'}</th>
-                    <th className="py-3.5 px-4">Price</th>
-                    <th className="py-3.5 px-4">Available & Limits</th>
-                    <th className="py-3.5 px-4">Payment Methods</th>
-                    <th className="py-3.5 px-5 text-right">Trade</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-[#2B3139]">
-                  {filteredOffers.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="py-14 px-6 text-center space-y-2">
-                        <p className="text-sm font-medium text-slate-900 dark:text-[#EAECEF]">
-                          No {userSide === 'BUY' ? 'sellers' : 'buyers'} match your current {selectedAsset}/{fiat} filters.
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-[#848E9C]">
-                          Try switching fiat currency, clearing the amount filter, or posting your own P2P Ad.
-                        </p>
-                        <div className="pt-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAmountFilter('');
-                              setMerchantSearch('');
-                              setPaymentFilter('ALL');
-                              setVerifiedOnly(false);
-                              setPage(1);
-                            }}
-                            className="px-3.5 py-1.5 rounded-md border border-slate-200 dark:border-[#2B3139] text-xs font-semibold text-slate-700 dark:text-[#EAECEF] hover:border-[#F0B90B] cursor-pointer"
-                          >
-                            Reset Filters
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    displayedOffers.map((offer) => {
-                      const initials = offer.merchantName.slice(0, 2).toUpperCase();
-                      const ratingVal = offer.rating ?? 4.9;
-                      const positiveVal = offer.positiveRate ?? offer.completionRate;
-                      const reviewsTotal = offer.reviewsCount ?? Math.max(40, Math.round(offer.completedOrders * 0.3));
-                      return (
-                      <tr
-                        key={offer.id}
-                        className="hover:bg-slate-50 dark:hover:bg-[#1E2329]/70 transition-colors"
-                      >
-                        <td className="py-4 px-5">
-                          <div className="flex items-start gap-3">
+                {/* Standard P2P Ads List (Mobile & Desktop Binance Card Style) */}
+                <div className="rounded-xl border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] divide-y divide-slate-200 dark:divide-[#2B3139] overflow-hidden">
+                  {displayedOffers.slice(1).map((offer) => {
+                    const initials = offer.merchantName.slice(0, 1).toUpperCase();
+                    const positivePct = (offer.positiveRate ?? offer.completionRate).toFixed(2);
+                    const completionPct = offer.completionRate.toFixed(2);
+                    const fiatSymbol = FIAT_RATES[offer.fiat].symbol;
+                    const priceDecimals = offer.price < 10 ? 3 : 2;
+                    const formattedPrice = offer.price.toLocaleString('en-IN', {
+                      minimumFractionDigits: priceDecimals,
+                      maximumFractionDigits: priceDecimals,
+                    });
+                    const getBarColor = (pm: PaymentMethodType) => {
+                      if (pm.includes('IMPS') || pm.includes('NEFT') || pm.includes('Bank') || pm.includes('Cash') || pm.includes('Wise')) {
+                        return 'bg-[#F0B90B]';
+                      }
+                      if (pm.includes('Paytm') || pm.includes('eRupee') || pm.includes('SBI') || pm.includes('HDFC') || pm.includes('ICICI') || pm.includes('Kotak')) {
+                        return 'bg-[#3B82F6]';
+                      }
+                      return 'bg-[#F97316]';
+                    };
+                    return (
+                      <div key={offer.id} className="p-4 sm:px-5 sm:py-4 hover:bg-slate-50/70 dark:hover:bg-[#1E2329]/50 transition-colors space-y-2.5">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
                             <button
                               type="button"
                               onClick={() => setProfileOffer(offer)}
-                              className="w-9 h-9 rounded-md bg-slate-100 dark:bg-[#2B3139] border border-slate-200 dark:border-[#363C45] flex items-center justify-center font-display text-xs font-bold text-[#F0B90B] shrink-0 cursor-pointer hover:border-[#F0B90B]"
-                              aria-label={`View ${offer.merchantName} profile`}
+                              className="relative w-7 h-7 rounded-full bg-slate-900 text-white dark:bg-[#EAECEF] dark:text-[#0B0E11] flex items-center justify-center text-xs font-bold shrink-0 cursor-pointer"
                             >
                               {initials}
+                              <span
+                                className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-[#181A20] ${
+                                  offer.isOnline ? 'bg-[#0ECB81]' : 'bg-slate-400'
+                                }`}
+                              />
                             </button>
-                            <div className="min-w-0">
-                              <div className="flex flex-wrap items-center gap-1.5">
-                                <button
-                                  type="button"
-                                  onClick={() => setProfileOffer(offer)}
-                                  className="font-semibold text-sm text-slate-900 dark:text-[#EAECEF] hover:text-[#F0B90B] text-left cursor-pointer"
-                                >
-                                  {offer.merchantName}
-                                </button>
-                                {offer.isVerified && <ShieldCheck className="w-4 h-4 text-[#F0B90B] shrink-0" />}
-                                {offer.location && (
-                                  <span className="text-[11px] text-slate-500 dark:text-[#848E9C]">
-                                    · {offer.location}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500 dark:text-[#848E9C] tabular-nums">
-                                <span>{offer.completedOrders.toLocaleString('en-IN')} trades</span>
-                                <span>·</span>
-                                <span>{offer.completionRate}% completion</span>
-                                <span>·</span>
-                                <span className="inline-flex items-center gap-1 text-[#F0B90B] font-medium">
-                                  <Star className="w-3 h-3 fill-[#F0B90B] text-[#F0B90B]" />
-                                  {ratingVal.toFixed(1)} ({positiveVal}% positive · {reviewsTotal.toLocaleString('en-IN')} reviews)
-                                </span>
-                                <span>·</span>
-                                <span className={offer.isOnline ? 'text-[#0ECB81]' : 'text-slate-400'}>
-                                  {offer.isOnline ? 'Online' : 'Away'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-
-                        <td className="py-4 px-4">
-                          <div className="font-mono text-lg font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">
-                            {formatFiat(offer.price, offer.fiat)}
-                          </div>
-                          {offer.quoteBuyPrice && offer.quoteSellPrice ? (
-                            <div className="mt-0.5 font-mono text-[11px] text-slate-500 dark:text-[#848E9C] tabular-nums">
-                              <span className="text-[#0ECB81]">Buy {formatFiat(offer.quoteBuyPrice, offer.fiat)}</span>
-                              {' · '}
-                              <span className="text-[#F6465D]">Sell {formatFiat(offer.quoteSellPrice, offer.fiat)}</span>
-                            </div>
-                          ) : (
-                            <div className="text-[11px] text-slate-500 dark:text-[#848E9C]">
-                              per {offer.asset}
-                            </div>
-                          )}
-                        </td>
-
-                        <td className="py-4 px-4 text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="text-slate-500 dark:text-[#848E9C] w-16">Available</span>
-                            <span className="font-mono font-semibold text-slate-900 dark:text-[#EAECEF] tabular-nums">
-                              {formatCrypto(offer.availableAmount, offer.asset)} {offer.asset}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-slate-500 dark:text-[#848E9C] w-16">Limits</span>
-                            <span className="font-mono text-slate-700 dark:text-[#EAECEF] tabular-nums">
-                              {formatFiat(offer.minLimit, offer.fiat)} – {formatFiat(offer.maxLimit, offer.fiat)}
-                            </span>
-                          </div>
-                        </td>
-
-                        <td className="py-4 px-4 text-xs text-slate-700 dark:text-[#EAECEF]">
-                          {offer.paymentMethods.join(' · ')}
-                        </td>
-
-                        <td className="py-4 px-5 text-right">
-                          <div className="inline-flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => setProfileOffer(offer)}
-                              className="px-2.5 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] hover:border-[#F0B90B] text-[11px] font-medium text-slate-600 dark:text-[#848E9C] hover:text-slate-900 dark:hover:text-[#EAECEF] cursor-pointer"
+                              className="font-semibold text-sm text-slate-900 dark:text-[#EAECEF] hover:text-[#F0B90B] truncate cursor-pointer"
+                            >
+                              {offer.merchantName}
+                            </button>
+                            {offer.isVerified && (
+                              <span className="inline-flex items-center gap-1 shrink-0">
+                                <Lock className="w-3.5 h-3.5 text-[#F0B90B]" />
+                                <Gem className="w-3.5 h-3.5 text-[#8B5CF6]" />
+                              </span>
+                            )}
+                            {offer.location && (
+                              <span className="hidden sm:inline text-[11px] text-slate-500 dark:text-[#848E9C]">
+                                · {offer.location}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {offer.quoteBuyPrice && offer.quoteSellPrice && (
+                              <span className="font-mono text-[11px] text-slate-500 dark:text-[#848E9C] tabular-nums">
+                                <span className="text-[#0ECB81]">B {formatFiat(offer.quoteBuyPrice, offer.fiat)}</span>
+                                {' · '}
+                                <span className="text-[#F6465D]">S {formatFiat(offer.quoteSellPrice, offer.fiat)}</span>
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setProfileOffer(offer)}
+                              className="text-[11px] font-medium text-slate-500 dark:text-[#848E9C] hover:text-[#F0B90B] underline decoration-dotted cursor-pointer"
                             >
                               Profile
                             </button>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-500 dark:text-[#848E9C] tabular-nums">
+                          <span>{offer.completedOrders.toLocaleString('en-IN')} orders</span>
+                          <span>|</span>
+                          <span>{completionPct}% completion</span>
+                          <span>|</span>
+                          <span className="inline-flex items-center gap-1">
+                            <ThumbsUp className="w-3 h-3" />
+                            {positivePct}%
+                          </span>
+                          <span>|</span>
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {offer.paymentWindowMinutes} min
+                          </span>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+                          <div className="space-y-1">
+                            <div className="flex items-baseline gap-1 font-mono tabular-nums">
+                              <span className="text-sm font-semibold text-slate-800 dark:text-[#EAECEF]">{fiatSymbol}</span>
+                              <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{formattedPrice}</span>
+                            </div>
+
+                            <div className="text-xs text-slate-600 dark:text-[#848E9C] tabular-nums space-y-0.5">
+                              <div>
+                                Available:{' '}
+                                <span className="font-mono text-slate-900 dark:text-[#EAECEF] font-medium">
+                                  {formatCrypto(offer.availableAmount, offer.asset)} {offer.asset}
+                                </span>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <span className="w-16 shrink-0">Order Limit:</span>
+                                <span className="font-mono text-slate-900 dark:text-[#EAECEF]">
+                                  {formatOrderLimit(offer.minLimit, offer.maxLimit, offer.fiat)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-end justify-between sm:justify-end gap-3 pt-1">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-700 dark:text-[#EAECEF]">
+                              {offer.paymentMethods.map((pm) => (
+                                <span key={pm} className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                                  <span className={`w-[3px] h-3 rounded-full ${getBarColor(pm)}`} />
+                                  <span>{pm}</span>
+                                </span>
+                              ))}
+                            </div>
+
                             <button
                               type="button"
                               onClick={() => setSelectedOffer(offer)}
-                              className={`px-4 py-2 rounded-md text-xs font-semibold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                              className={`px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
                                 userSide === 'BUY'
-                                  ? 'bg-[#0ECB81] hover:bg-[#0BB574] text-[#0B0E11]'
+                                  ? 'bg-[#0ECB81] hover:bg-[#0BB574] text-white'
                                   : 'bg-[#F6465D] hover:bg-[#DF3B51] text-white'
                               }`}
                             >
                               {userSide === 'BUY' ? `Buy ${offer.asset}` : `Sell ${offer.asset}`}
                             </button>
                           </div>
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
                     );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  })}
+                </div>
+              </>
+            )}
 
             {filteredOffers.length > 0 && (
-              <div className="px-5 py-3.5 border-t border-slate-200 dark:border-[#2B3139] bg-slate-50/60 dark:bg-[#14171C] flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="rounded-xl border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] px-4 sm:px-5 py-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
                 <span className="text-slate-500 dark:text-[#848E9C] tabular-nums">
                   Showing <strong className="text-slate-900 dark:text-[#EAECEF]">{displayedOffers.length}</strong> of{' '}
                   <strong className="text-slate-900 dark:text-[#EAECEF]">{filteredOffers.length}</strong> verified{' '}
@@ -645,7 +938,282 @@ export const P2PView: React.FC = () => {
               </div>
             )}
           </div>
-        </>
+        </div>
+      )}
+
+      {subTab === 'profiles' && (
+        <div className="space-y-4">
+          {/* Profiles Filter Strip */}
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+            <div className="grid grid-cols-3 sm:inline-flex p-1 rounded-md bg-slate-100 dark:bg-[#181A20] border border-slate-200 dark:border-[#2B3139] w-full sm:w-auto">
+              {(
+                [
+                  { id: 'ALL', label: `All (${fiatProfiles.length})` },
+                  { id: 'SELL', label: `Sellers (${fiatProfiles.filter((p) => p.merchantSide === 'SELL').length})` },
+                  { id: 'BUY', label: `Buyers (${fiatProfiles.filter((p) => p.merchantSide === 'BUY').length})` },
+                ] as const
+              ).map((role) => (
+                <button
+                  key={role.id}
+                  type="button"
+                  onClick={() => {
+                    setProfileRoleFilter(role.id);
+                    setProfilePage(1);
+                  }}
+                  className={`px-3.5 py-1.5 rounded text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer text-center ${
+                    profileRoleFilter === role.id
+                      ? 'bg-white dark:bg-[#2B3139] text-slate-900 dark:text-[#EAECEF] shadow-xs'
+                      : 'text-slate-600 dark:text-[#848E9C] hover:text-slate-900 dark:hover:text-[#EAECEF]'
+                  }`}
+                >
+                  {role.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5">
+              <div className="relative col-span-2 sm:col-span-1">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search buyer/seller or city..."
+                  value={merchantSearch}
+                  onChange={(e) => {
+                    setMerchantSearch(e.target.value);
+                    setProfilePage(1);
+                  }}
+                  className="w-full sm:w-52 pl-8 pr-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-xs text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
+                />
+              </div>
+
+              <select
+                aria-label="Profile payment method filter"
+                value={paymentFilter}
+                onChange={(e) => {
+                  setPaymentFilter(e.target.value as 'ALL' | PaymentMethodType);
+                  setProfilePage(1);
+                }}
+                className="w-full sm:w-auto px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-xs text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
+              >
+                {P2P_PAYMENTS.map((pm) => (
+                  <option key={pm} value={pm}>{pm === 'ALL' ? 'All Payment Rails' : pm}</option>
+                ))}
+              </select>
+
+              <label className="w-full sm:w-auto inline-flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] text-xs text-slate-700 dark:text-[#EAECEF] cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={verifiedOnly}
+                  onChange={(e) => {
+                    setVerifiedOnly(e.target.checked);
+                    setProfilePage(1);
+                  }}
+                  className="accent-[#F0B90B]"
+                />
+                <span>Verified Only</span>
+              </label>
+
+              {fiat === 'INR' && (
+                <button
+                  type="button"
+                  onClick={randomizeP2PRates}
+                  className="col-span-2 sm:col-span-1 w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] hover:border-[#F0B90B] text-xs font-semibold text-slate-700 dark:text-[#EAECEF] whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-[#F0B90B]" />
+                  <span>Refresh Quotes</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {filteredProfiles.length === 0 ? (
+            <div className="rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] py-12 px-4 text-center space-y-2">
+              <p className="text-sm font-medium text-slate-900 dark:text-[#EAECEF]">No merchant profiles match your filter.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileRoleFilter('ALL');
+                  setMerchantSearch('');
+                  setPaymentFilter('ALL');
+                  setVerifiedOnly(false);
+                  setProfilePage(1);
+                }}
+                className="px-3.5 py-1.5 rounded-md border border-slate-200 dark:border-[#2B3139] text-xs font-semibold text-slate-700 dark:text-[#EAECEF] hover:border-[#F0B90B] cursor-pointer"
+              >
+                Reset Filters
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                {displayedProfiles.map((offer) => {
+                  const initials = offer.merchantName.slice(0, 2).toUpperCase();
+                  const ratingVal = offer.rating ?? 4.9;
+                  const reviewsTotal = offer.reviewsCount ?? Math.max(45, Math.round(offer.completedOrders * 0.3));
+                  const isSeller = offer.merchantSide === 'SELL';
+                  return (
+                    <div
+                      key={`prof-${offer.id}`}
+                      className="rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] p-4 flex flex-col justify-between gap-3 hover:border-[#F0B90B]/60 transition-colors"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-2.5">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <button
+                              type="button"
+                              onClick={() => setProfileOffer(offer)}
+                              className="w-10 h-10 rounded-md bg-slate-100 dark:bg-[#2B3139] border border-slate-200 dark:border-[#363C45] flex items-center justify-center font-display text-xs font-bold text-[#F0B90B] shrink-0 cursor-pointer"
+                            >
+                              {initials}
+                            </button>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setProfileOffer(offer)}
+                                  className="font-semibold text-sm text-slate-900 dark:text-[#EAECEF] hover:text-[#F0B90B] truncate cursor-pointer text-left"
+                                >
+                                  {offer.merchantName}
+                                </button>
+                                {offer.isVerified && <ShieldCheck className="w-3.5 h-3.5 text-[#F0B90B] shrink-0" />}
+                              </div>
+                              <div className="text-[11px] text-slate-500 dark:text-[#848E9C] truncate">
+                                {offer.location ?? 'India'} ·{' '}
+                                <span className={offer.isOnline ? 'text-[#0ECB81]' : 'text-slate-400'}>
+                                  {offer.isOnline ? 'Online' : 'Away'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <span
+                            className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shrink-0 ${
+                              isSeller
+                                ? 'bg-[#0ECB81]/15 text-[#0ECB81]'
+                                : 'bg-[#F6465D]/15 text-[#F6465D]'
+                            }`}
+                          >
+                            {isSeller ? 'Seller' : 'Buyer'}
+                          </span>
+                        </div>
+
+                        {offer.bio && (
+                          <p className="text-xs text-slate-600 dark:text-[#848E9C] line-clamp-2 leading-relaxed">
+                            {offer.bio}
+                          </p>
+                        )}
+
+                        <div className="grid grid-cols-3 gap-2 p-2.5 rounded-md bg-slate-50 dark:bg-[#0B0E11] border border-slate-200 dark:border-[#2B3139] text-xs tabular-nums">
+                          <div>
+                            <div className="text-[10px] text-slate-500 dark:text-[#848E9C]">Trades</div>
+                            <div className="font-mono font-bold text-slate-900 dark:text-[#EAECEF]">
+                              {offer.completedOrders.toLocaleString('en-IN')}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-slate-500 dark:text-[#848E9C]">Completion</div>
+                            <div className="font-mono font-bold text-[#0ECB81]">{offer.completionRate}%</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-slate-500 dark:text-[#848E9C]">Rating</div>
+                            <div className="font-mono font-bold text-[#F0B90B]">
+                              {ratingVal.toFixed(1)}★ ({reviewsTotal})
+                            </div>
+                          </div>
+                        </div>
+
+                        {offer.quoteBuyPrice && offer.quoteSellPrice ? (
+                          <div className="flex items-center justify-between gap-2 text-xs font-mono tabular-nums">
+                            <div>
+                              <span className="text-slate-500 dark:text-[#848E9C]">Buy: </span>
+                              <span className="font-bold text-[#0ECB81]">{formatFiat(offer.quoteBuyPrice, offer.fiat)}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 dark:text-[#848E9C]">Sell: </span>
+                              <span className="font-bold text-[#F6465D]">{formatFiat(offer.quoteSellPrice, offer.fiat)}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-xs font-mono font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">
+                            {formatFiat(offer.price, offer.fiat)} / {offer.asset}
+                          </div>
+                        )}
+
+                        <div className="text-[11px] text-slate-500 dark:text-[#848E9C] truncate">
+                          {offer.paymentMethods.join(' · ')} ·{' '}
+                          <span className="font-mono text-slate-700 dark:text-[#EAECEF]">
+                            {formatOrderLimit(offer.minLimit, offer.maxLimit, offer.fiat)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-[#2B3139]">
+                        <button
+                          type="button"
+                          onClick={() => setProfileOffer(offer)}
+                          className="flex-1 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] hover:border-[#F0B90B] text-xs font-semibold text-slate-700 dark:text-[#EAECEF] cursor-pointer"
+                        >
+                          Reviews & Bio
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedOffer(offer)}
+                          className={`flex-1 py-2 rounded-md text-xs font-semibold cursor-pointer ${
+                            isSeller
+                              ? 'bg-[#0ECB81] hover:bg-[#0BB574] text-[#0B0E11]'
+                              : 'bg-[#F6465D] hover:bg-[#DF3B51] text-white'
+                          }`}
+                        >
+                          {isSeller ? `Buy ${offer.asset}` : `Sell ${offer.asset}`}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] px-4 sm:px-5 py-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <span className="text-slate-500 dark:text-[#848E9C] tabular-nums">
+                  Showing <strong className="text-slate-900 dark:text-[#EAECEF]">{displayedProfiles.length}</strong> of{' '}
+                  <strong className="text-slate-900 dark:text-[#EAECEF]">{filteredProfiles.length}</strong> buyer &amp; seller profiles ({fiat})
+                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {filteredProfiles.length > PROFILE_PAGE_SIZE && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllProfiles((s) => !s)}
+                      className="px-3 py-1.5 rounded border border-slate-200 dark:border-[#2B3139] hover:border-[#F0B90B] font-semibold text-slate-700 dark:text-[#EAECEF] cursor-pointer"
+                    >
+                      {showAllProfiles ? `Paginate (${PROFILE_PAGE_SIZE}/page)` : `Show All ${filteredProfiles.length}`}
+                    </button>
+                  )}
+                  {!showAllProfiles && totalProfilePages > 1 && (
+                    <div className="inline-flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        disabled={safeProfilePage <= 1}
+                        onClick={() => setProfilePage((p) => Math.max(1, p - 1))}
+                        className="px-2.5 py-1.5 rounded border border-slate-200 dark:border-[#2B3139] text-slate-700 dark:text-[#EAECEF] disabled:opacity-40 cursor-pointer"
+                      >
+                        Prev
+                      </button>
+                      <span className="font-mono px-2 text-slate-600 dark:text-[#848E9C] tabular-nums">
+                        {safeProfilePage} / {totalProfilePages}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={safeProfilePage >= totalProfilePages}
+                        onClick={() => setProfilePage((p) => Math.min(totalProfilePages, p + 1))}
+                        className="px-2.5 py-1.5 rounded border border-slate-200 dark:border-[#2B3139] text-slate-700 dark:text-[#EAECEF] disabled:opacity-40 cursor-pointer"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       )}
 
       {subTab === 'orders' && (
@@ -823,7 +1391,7 @@ export const P2PView: React.FC = () => {
                         {formatCrypto(ad.availableAmount, ad.asset)} {ad.asset}
                       </td>
                       <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-[#848E9C]">
-                        {formatFiat(ad.minLimit, ad.fiat)} – {formatFiat(ad.maxLimit, ad.fiat)}
+                        {formatOrderLimit(ad.minLimit, ad.maxLimit, ad.fiat)}
                       </td>
                       <td className="py-3.5 px-4 font-semibold">
                         <span className={ad.isOnline ? 'text-[#0ECB81]' : 'text-slate-400'}>
@@ -914,7 +1482,13 @@ export const P2PView: React.FC = () => {
             </div>
             <div>
               <label className="block text-xs text-slate-500 dark:text-[#848E9C] mb-1">
-                {newPmType.includes('UPI') || newPmType === 'Google Pay (GPay)' || newPmType === 'PhonePe' || newPmType === 'CRED Pay'
+                {newPmType.includes('UPI') ||
+                newPmType === 'Google Pay (GPay)' ||
+                newPmType === 'PhonePe' ||
+                newPmType === 'CRED Pay' ||
+                newPmType === 'SBI YONO Pay' ||
+                newPmType === 'HDFC PayZapp' ||
+                newPmType === 'ICICI iMobile Pay'
                   ? 'UPI ID (VPA)'
                   : 'Account Number / Handle / IBAN'}
               </label>
@@ -922,7 +1496,13 @@ export const P2PView: React.FC = () => {
                 type="text"
                 required
                 placeholder={
-                  newPmType.includes('UPI') || newPmType === 'Google Pay (GPay)' || newPmType === 'PhonePe' || newPmType === 'CRED Pay'
+                  newPmType.includes('UPI') ||
+                  newPmType === 'Google Pay (GPay)' ||
+                  newPmType === 'PhonePe' ||
+                  newPmType === 'CRED Pay' ||
+                  newPmType === 'SBI YONO Pay' ||
+                  newPmType === 'HDFC PayZapp' ||
+                  newPmType === 'ICICI iMobile Pay'
                     ? 'e.g. name@okaxis or 98XXXXXXXX@ybl'
                     : 'e.g. 50100482910421'
                 }
@@ -936,13 +1516,17 @@ export const P2PView: React.FC = () => {
               <input
                 type="text"
                 required
-                placeholder={newPmType === 'UPI' ? 'e.g. Google Pay / PhonePe / HDFC' : 'e.g. HDFC Bank / SBI / ICICI'}
+                placeholder={newPmType.includes('UPI') ? 'e.g. Google Pay / PhonePe / HDFC' : 'e.g. HDFC Bank / SBI / ICICI / Airtel'}
                 value={newPmBank}
                 onChange={(e) => setNewPmBank(e.target.value)}
                 className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] bg-slate-50 dark:bg-[#0B0E11] text-xs text-slate-900 dark:text-[#EAECEF]"
               />
             </div>
-            {(newPmType === 'IMPS' || newPmType === 'NEFT / RTGS' || newPmType === 'Bank Transfer') && (
+            {(newPmType === 'IMPS' ||
+              newPmType === 'NEFT / RTGS' ||
+              newPmType === 'Bank Transfer' ||
+              newPmType === 'Kotak 811' ||
+              newPmType === 'Airtel Payments Bank') && (
               <div>
                 <label className="block text-xs text-slate-500 dark:text-[#848E9C] mb-1">IFSC Code (For Indian Banks)</label>
                 <input
@@ -1063,7 +1647,7 @@ export const P2PView: React.FC = () => {
                 <div className="text-slate-600 dark:text-[#848E9C]">
                   {profileOffer.paymentMethods.join(' · ')} · Limits{' '}
                   <span className="font-mono text-slate-900 dark:text-[#EAECEF]">
-                    {formatFiat(profileOffer.minLimit, profileOffer.fiat)} – {formatFiat(profileOffer.maxLimit, profileOffer.fiat)}
+                    {formatOrderLimit(profileOffer.minLimit, profileOffer.maxLimit, profileOffer.fiat)}
                   </span>
                 </div>
               </div>

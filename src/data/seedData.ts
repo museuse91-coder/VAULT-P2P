@@ -16,11 +16,11 @@ import {
 } from '../types/exchange';
 
 export const FIAT_RATES: Record<FiatCurrency, { symbol: string; rateFromUsd: number; label: string }> = {
+  INR: { symbol: '₹', rateFromUsd: 84.35, label: 'Indian Rupee' },
   USD: { symbol: '$', rateFromUsd: 1, label: 'US Dollar' },
   EUR: { symbol: '€', rateFromUsd: 0.92, label: 'Euro' },
   GBP: { symbol: '£', rateFromUsd: 0.78, label: 'British Pound' },
   AED: { symbol: 'د.إ', rateFromUsd: 3.67, label: 'UAE Dirham' },
-  INR: { symbol: '₹', rateFromUsd: 84.35, label: 'Indian Rupee' },
   NGN: { symbol: '₦', rateFromUsd: 1645, label: 'Nigerian Naira' },
 };
 
@@ -363,11 +363,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 103.2,
     availableAmount: 42000,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['UPI', 'Google Pay (GPay)', 'PhonePe', 'IMPS'],
     paymentWindowMinutes: 15,
-    terms: 'UPI / GPay / PhonePe / IMPS accepted 24x7. Payment must come from your PAN-verified bank account. Share 12-digit UTR in chat.',
+    terms: 'UPI / GPay / PhonePe / IMPS accepted 24x7 (300 INR to 50,000 INR). Payment must come from your PAN-verified bank account. Share 12-digit UTR in chat.',
   },
   {
     id: 'p2p-s-13',
@@ -380,7 +380,7 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     completionRate: 99.8,
     avgReleaseMinutes: 3,
     location: 'Bengaluru, KA',
-    bio: 'Verified Karnataka OTC merchant supporting Paytm UPI, CRED Pay, and Digital eRupee.',
+    bio: 'Verified Karnataka OTC merchant supporting Paytm UPI, CRED Pay, and Digital eRupee (300 INR to 50,000 INR).',
     rating: 5.0,
     positiveRate: 99.8,
     reviewsCount: 1410,
@@ -394,11 +394,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 104.15,
     availableAmount: 65000,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['Paytm UPI', 'CRED Pay', 'IMPS', 'Digital eRupee'],
     paymentWindowMinutes: 15,
-    terms: 'Instant Paytm UPI, CRED Pay, IMPS & eRupee desk. Avoid crypto keywords in payment remarks.',
+    terms: 'Instant Paytm UPI, CRED Pay, IMPS & eRupee desk (300 INR to 50,000 INR). Avoid crypto keywords in payment remarks.',
   },
   {
     id: 'p2p-s-14',
@@ -411,7 +411,7 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     completionRate: 99.1,
     avgReleaseMinutes: 4,
     location: 'Pune, MH',
-    bio: 'Active GPay, PhonePe & BHIM UPI trader for ₹5,000 to ₹1,00,000 orders.',
+    bio: 'Active GPay, PhonePe & BHIM UPI trader for 300 INR to 50,000 INR orders.',
     rating: 4.8,
     positiveRate: 99.1,
     reviewsCount: 685,
@@ -424,11 +424,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 105.4,
     availableAmount: 19500,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['UPI', 'Google Pay (GPay)', 'BHIM UPI', 'Paytm Wallet'],
     paymentWindowMinutes: 15,
-    terms: '₹5,000 to ₹1 Lakh UPI orders welcome (GPay / PhonePe / BHIM / Paytm).',
+    terms: '300 INR to 50,000 INR UPI orders welcome (GPay / PhonePe / BHIM / Paytm).',
   },
   {
     id: 'p2p-s-20',
@@ -455,11 +455,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 106.78,
     availableAmount: 38000,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['PhonePe', 'Amazon Pay UPI', 'UPI', 'IMPS'],
     paymentWindowMinutes: 15,
-    terms: 'Same-name bank/UPI required. Instant release on UTR verification.',
+    terms: 'Same-name bank/UPI required (300 INR to 50,000 INR). Instant release on UTR verification.',
   },
   {
     id: 'p2p-s-21',
@@ -485,11 +485,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 108.15,
     availableAmount: 29400,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['Google Pay (GPay)', 'Paytm UPI', 'NEFT / RTGS', 'UPI'],
     paymentWindowMinutes: 15,
-    terms: 'Safe verified INR liquidity. Screenshot + UTR speeds up release.',
+    terms: 'Safe verified INR liquidity (300 INR to 50,000 INR). Screenshot + UTR speeds up release.',
   },
   {
     id: 'p2p-s-22',
@@ -509,17 +509,17 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     quoteBuyPrice: 109.42,
     quoteSellPrice: 104.88,
     reviews: [
-      { id: 'rev-9', reviewer: 'Harpreet_S', rating: 5, comment: 'Quick ₹1,00,000 IMPS settlement, great communication.', paymentMethod: 'IMPS', dateLabel: '4h ago' },
+      { id: 'rev-9', reviewer: 'Harpreet_S', rating: 5, comment: 'Quick ₹50,000 IMPS settlement, great communication.', paymentMethod: 'IMPS', dateLabel: '4h ago' },
     ],
     asset: 'USDT',
     fiat: 'INR',
     price: 109.42,
     availableAmount: 22000,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['CRED Pay', 'BHIM UPI', 'PhonePe', 'IMPS'],
     paymentWindowMinutes: 15,
-    terms: 'Orders from ₹5,000 up to ₹1,00,000. Only self-owned Indian bank accounts.',
+    terms: 'Orders from 300 INR to 50,000 INR. Only self-owned Indian bank accounts.',
   },
   {
     id: 'p2p-s-23',
@@ -545,11 +545,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 110.86,
     availableAmount: 14800,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['UPI', 'Paytm UPI', 'Digital eRupee', 'Paytm Wallet'],
     paymentWindowMinutes: 15,
-    terms: 'Quick release after payment reflection. No third-party transfers.',
+    terms: 'Quick release after payment reflection (300 INR to 50,000 INR). No third-party transfers.',
   },
   {
     id: 'p2p-s-15',
@@ -675,11 +675,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 103.55,
     availableAmount: 35000,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['UPI', 'Google Pay (GPay)', 'IMPS', 'Digital eRupee'],
     paymentWindowMinutes: 15,
-    terms: 'Clean USDC liquidity via UPI / GPay / eRupee.',
+    terms: 'Clean USDC liquidity via UPI / GPay / eRupee (300 INR to 50,000 INR).',
   },
   {
     id: 'p2p-s-10',
@@ -888,11 +888,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 105.0,
     availableAmount: 55000,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['UPI', 'Google Pay (GPay)', 'PhonePe', 'IMPS'],
     paymentWindowMinutes: 15,
-    terms: 'Safe clean funds. Instant UPI / GPay / PhonePe payout directly to your linked bank.',
+    terms: 'Safe clean funds (300 INR to 50,000 INR). Instant UPI / GPay / PhonePe payout directly to your linked bank.',
   },
   {
     id: 'p2p-b-9',
@@ -905,7 +905,7 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     completionRate: 99.5,
     avgReleaseMinutes: 4,
     location: 'Jaipur, RJ',
-    bio: 'Tax-compliant Rajasthan desk paying cleanly via IMPS, Paytm UPI & eRupee.',
+    bio: 'Tax-compliant Rajasthan desk paying cleanly via IMPS, Paytm UPI & eRupee (300 INR to 50,000 INR).',
     rating: 4.9,
     positiveRate: 99.5,
     reviewsCount: 1125,
@@ -918,11 +918,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 104.72,
     availableAmount: 78000,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['IMPS', 'Paytm UPI', 'NEFT / RTGS', 'Digital eRupee'],
     paymentWindowMinutes: 15,
-    terms: 'Tax-compliant clean corporate IMPS & UPI payouts. Zero lien risk.',
+    terms: 'Tax-compliant clean corporate IMPS & UPI payouts (300 INR to 50,000 INR). Zero lien risk.',
   },
   {
     id: 'p2p-b-15',
@@ -942,18 +942,18 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     quoteSellPrice: 104.35,
     quoteBuyPrice: 104.95,
     reviews: [
-      { id: 'rev-b4', reviewer: 'Tanvi_M', rating: 5, comment: 'Super reliable buyer for ₹1,00,000 cashouts.', paymentMethod: 'CRED Pay', dateLabel: '45m ago' },
+      { id: 'rev-b4', reviewer: 'Tanvi_M', rating: 5, comment: 'Super reliable buyer for ₹50,000 cashouts.', paymentMethod: 'CRED Pay', dateLabel: '45m ago' },
       { id: 'rev-b5', reviewer: 'Yash_P', rating: 5, comment: 'Always fast with UPI payments.', paymentMethod: 'UPI', dateLabel: '2d ago' },
     ],
     asset: 'USDT',
     fiat: 'INR',
     price: 104.35,
     availableAmount: 92000,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['Google Pay (GPay)', 'CRED Pay', 'UPI', 'IMPS'],
     paymentWindowMinutes: 15,
-    terms: 'Instant GPay / CRED Pay / IMPS payout from verified business account.',
+    terms: 'Instant GPay / CRED Pay / IMPS payout from verified business account (300 INR to 50,000 INR).',
   },
   {
     id: 'p2p-b-16',
@@ -979,11 +979,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 103.92,
     availableAmount: 46000,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['PhonePe', 'BHIM UPI', 'Amazon Pay UPI', 'UPI'],
     paymentWindowMinutes: 15,
-    terms: 'Fast PhonePe / BHIM / Amazon Pay UPI payouts for ₹5,000–₹1,00,000.',
+    terms: 'Fast PhonePe / BHIM / Amazon Pay UPI payouts (300 INR to 50,000 INR).',
   },
   {
     id: 'p2p-b-17',
@@ -1009,11 +1009,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 103.48,
     availableAmount: 33000,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['Paytm UPI', 'Paytm Wallet', 'UPI', 'IMPS'],
     paymentWindowMinutes: 15,
-    terms: 'Payment sent only from verified account. Share UPI ID in chat if preferred.',
+    terms: 'Payment sent only from verified account (300 INR to 50,000 INR). Share UPI ID in chat if preferred.',
   },
   {
     id: 'p2p-b-18',
@@ -1039,11 +1039,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 103.05,
     availableAmount: 26500,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['BHIM UPI', 'Google Pay (GPay)', 'Digital eRupee', 'UPI'],
     paymentWindowMinutes: 15,
-    terms: '₹5,000 to ₹1,00,000 orders paid promptly via UPI or eRupee.',
+    terms: '300 INR to 50,000 INR orders paid promptly via UPI or eRupee.',
   },
   {
     id: 'p2p-b-19',
@@ -1069,11 +1069,11 @@ export const INITIAL_P2P_OFFERS: P2POffer[] = [
     fiat: 'INR',
     price: 102.67,
     availableAmount: 18500,
-    minLimit: 5000,
-    maxLimit: 100000,
+    minLimit: 300,
+    maxLimit: 50000,
     paymentMethods: ['PhonePe', 'Amazon Pay UPI', 'IMPS', 'UPI'],
     paymentWindowMinutes: 15,
-    terms: 'Instant INR payout. Verify bank credit before releasing escrow.',
+    terms: 'Instant INR payout (300 INR to 50,000 INR). Verify bank credit before releasing escrow.',
   },
   {
     id: 'p2p-b-10',
@@ -1236,6 +1236,12 @@ function generateExtraIndianP2POffers(): P2POffer[] {
     'Vijayawada, AP', 'Raipur, CG', 'Jodhpur, RJ', 'Udaipur, RJ', 'Agra, UP',
     'Meerut, UP', 'Thane, MH', 'Navi Mumbai, MH', 'Faridabad, HR', 'Ghaziabad, UP',
     'Jalandhar, PB', 'Gwalior, MP', 'Kota, RJ', 'Hubballi, KA', 'Mangaluru, KA',
+    'Tiruchirappalli, TN', 'Jamshedpur, JH', 'Rourkela, OD', 'Durgapur, WB', 'Asansol, WB',
+    'Ajmer, RJ', 'Ujjain, MP', 'Kolhapur, MH', 'Aurangabad, MH', 'Solapur, MH',
+    'Salem, TN', 'Warangal, TS', 'Guntur, AP', 'Nellore, AP', 'Bikaner, RJ',
+    'Nanded, MH', 'Bhilai, CG', 'Cuttack, OD', 'Firozabad, UP', 'Shimla, HP',
+    'Puducherry, PY', 'Panaji, GA', 'Siliguri, WB', 'Muzaffarpur, BR', 'Bilaspur, CG',
+    'Kozhikode, KL', 'Thrissur, KL', 'Kollam, KL', 'Aligarh, UP', 'Bareilly, UP',
   ];
 
   const sellerHandles = [
@@ -1247,8 +1253,28 @@ function generateExtraIndianP2POffers(): P2POffer[] {
     'ParthEscrow_IN', 'KushalDigital', 'Lakshay_Trades', 'Samarth_UPI', 'RudraCapital_IN',
     'Ritvik_Liquidity', 'VedantPay_OTC', 'AnirudhCrypto', 'TejasExpress_IN', 'NikhilOTC_Pro',
     'Kartikeya_Desk', 'SohamVault_IN', 'MihirLiquidity', 'RishabhPay_P2P', 'TusharPrime_IN',
-    'chirag_OTC_Hub', 'Mayank_Express', 'GauravEscrow', 'Piyush_Digital', 'AkashChain_IN',
+    'Chirag_OTC_Hub', 'Mayank_Express', 'GauravEscrow', 'Piyush_Digital', 'AkashChain_IN',
     'RohithUPI_Pro', 'SandeepOTC_Desk', 'VarunFin_India', 'KunalPrime_P2P', 'HemantVault_IN',
+    'Harshvardhan_OTC', 'PrateekUPI_Desk', 'ShashankCoin_IN', 'UjjwalEscrow_P2P', 'AbhinavPrime_IN',
+    'NitinLiquidity', 'SaurabhPay_India', 'DeepakOTC_Vault', 'ChetanExpress_UPI', 'YashwantTrades',
+    'AnkushDigital_IN', 'BhaveshCapital', 'Chiranjeev_P2P', 'DevendraFin_IN', 'EshanCrypto_Desk',
+    'FaisalUPI_Prime', 'GirishSettlement', 'HiteshVault_OTC', 'InderjitPay_IN', 'JatinLiquidity',
+    'KapilEscrow_Pro', 'LokeshTrades_IN', 'MohitDigital_UPI', 'NavneetPrime_P2P', 'OmkarOTC_Hub',
+    'PankajCrypto_IN', 'QasimExpress_Pay', 'RakeshVault_India', 'SachinUPI_Desk', 'Tarunesh_OTC',
+    'UtkarshCapital_IN', 'VaibhavEscrow_P2P', 'WasimDigital_IN', 'YogeshPay_Prime', 'ZubinLiquidity',
+    'ArpitFinTech_IN', 'BrijeshOTC_Desk', 'DineshCoin_India', 'GopalSettlement', 'HarishExpress_IN',
+    'ImranVault_UPI', 'JayeshPrime_OTC', 'KarthikPay_P2P', 'LalitEscrow_IN', 'MadhavDigital',
+    'NarendraTrades', 'Prashant_UPI_Pro', 'RajatCapital_IN', 'ShubhamOTC_Vault', 'TrilokLiquidity',
+    'UdayExpress_IN', 'VinayakPay_Desk', 'YashrajCrypto_IN', 'ZafarEscrow_Pro', 'SujoyPrime_India',
+    'AarushUSDT_Desk', 'BalajiPay_IN', 'ChandanEscrow_Pro', 'DarshanCrypto_IN', 'EknathLiquidity',
+    'FirozUPI_Vault', 'GaganOTC_India', 'HemrajSettlement', 'IshanviTrades_IN', 'JigneshPrime_UPI',
+    'KailashPay_Desk', 'LuvCrypto_IN', 'MaheshEscrow_Hub', 'NaveenUSDT_Pro', 'OjasLiquidity_IN',
+    'PradeepPay_UPI', 'Raghavendra_OTC', 'SanjayVault_India', 'TapasDigital_IN', 'UmangPrime_P2P',
+    'VikasExpress_UPI', 'Yogendra_OTC', 'ZeeshanPay_IN', 'AbhijitCrypto_Pro', 'BhanuEscrow_IN',
+    'Chetanya_Liquidity', 'DevratPay_India', 'GautamUSDT_Desk', 'HardikPrime_UPI', 'Indrajit_OTC',
+    'JitendraVault_IN', 'KamleshDigital_P2P', 'LakshmanPay_IN', 'ManojEscrow_Pro', 'NileshCrypto_IN',
+    'Omprakash_UPI', 'PramodLiquidity_IN', 'RameshUSDT_Hub', 'SatishPrime_OTC', 'TapanPay_India',
+    'UmeshVault_P2P', 'VirendraExpress_IN', 'WamanOTC_Desk', 'YuvakDigital_IN', 'AjitSettlement_IN',
   ];
 
   const buyerHandles = [
@@ -1262,22 +1288,50 @@ function generateExtraIndianP2POffers(): P2POffer[] {
     'MagadhSettlement', 'KalingaPay_OTC', 'KamrupLiquidity', 'Garhwal_Trades', 'DoabaExpress_IN',
     'NizamEscrow_P2P', 'CholaDigital_IN', 'Hoysala_OTC', 'CheraVault_Buy', 'KutchLiquidity',
     'MalwaPay_Direct', 'BundelCrypto_IN', 'KumaonOTC_Buy', 'NilgiriInstant', 'SahyadriPay_P2P',
+    'AditiUPI_BuyDesk', 'BhavnaEscrow_IN', 'ChitraSettlement', 'DaminiPrime_OTC', 'EktaLiquidity_IN',
+    'FarhaDigital_Pay', 'GarimaVault_P2P', 'HeenaTrades_UPI', 'IshitaCapital_IN', 'JuhiExpress_Buy',
+    'KalpanaOTC_Pro', 'LavanyaPay_India', 'ManishaEscrow_IN', 'NamrataDigital', 'OjaswiVault_Buy',
+    'PallaviUPI_Direct', 'RashiSettlement', 'SanaPrime_OTC', 'TanviLiquidity_IN', 'UrvashiTrades',
+    'VandanaPay_P2P', 'YaminiEscrow_IN', 'ZoyaExpress_UPI', 'AartiCapital_Buy', 'BinitaDigital_IN',
+    'ChandniOTC_Desk', 'DeepaliVault_IN', 'EshaSettlement', 'FalguniPay_UPI', 'GeetaPrime_Buy',
+    'HemaLiquidity_IN', 'IndiraEscrow_P2P', 'JayaDigital_OTC', 'KirtiTrades_IN', 'LeelaPay_Direct',
+    'MayaVault_India', 'NiharikaUPI_Buy', 'Pratibha_OTC', 'RadhikaEscrow_IN', 'SeemaSettlement',
+    'ShilpaPrime_P2P', 'TrishnaLiquidity', 'UmaExpress_UPI', 'VeenaCapital_IN', 'WafaDigital_Buy',
+    'KaveriDesk_India', 'YamunaEscrow_Pro', 'SatlujPay_OTC', 'BeasLiquidity_IN', 'RaviSettlement',
+    'ChenabVault_P2P', 'JhelumUPI_Buy', 'TaptiExpress_IN', 'MahanadiPay_Pro', 'Subarnarekha_OTC',
+    'AlaknandaPay_IN', 'Bhagirathi_BuyDesk', 'MandakiniEscrow_IN', 'PambaLiquidity_IN', 'PeriyarUPI_Buy',
+    'Tungabhadra_OTC', 'KrishnaVault_P2P', 'IndravatiPay_IN', 'ChambalSettlement', 'BetwaDigital_Buy',
+    'GomtiExpress_UPI', 'GhagharaPrime_IN', 'KosiLiquidity_Buy', 'DamodarEscrow_IN', 'TeestaPay_Pro',
+    'Brahmaputra_OTC', 'LohitVault_P2P', 'BarakDigital_IN', 'SabarmatiUPI_Buy', 'MahiSettlement_IN',
+    'LuniExpress_Pay', 'BanasCapital_IN', 'NoyyalLiquidity_IN', 'VaigaiEscrow_Buy', 'Tamirabarani_OTC',
+    'PalarPay_Direct', 'PennarVault_IN', 'Vamsadhara_UPI', 'NagavaliDigital_IN', 'Rushikulya_Buy',
+    'BaitaraniPay_IN', 'BrahmaniEscrow_Pro', 'HooghlyLiquidity', 'Rupnarayan_OTC', 'MatlaDigital_IN',
+    'SoneSettlement_IN', 'KenExpress_UPI', 'TonsVault_Buy', 'HindonPay_India', 'KaliLiquidity_P2P',
+    'Ramganga_OTC_Buy', 'ShardaEscrow_IN', 'RaptiDigital_IN', 'GandakPay_Direct', 'PunpunVault_IN',
+    'FalguUPI_BuyDesk', 'AjaySettlement_IN', 'Mayurakshi_OTC', 'KangsabatiPay_IN', 'HaldiLiquidity_IN',
   ];
 
   const paymentPools: PaymentMethodType[][] = [
-    ['UPI', 'Google Pay (GPay)', 'PhonePe', 'IMPS'],
-    ['PhonePe', 'Paytm UPI', 'BHIM UPI', 'UPI'],
-    ['Google Pay (GPay)', 'CRED Pay', 'UPI', 'IMPS'],
-    ['Paytm UPI', 'Amazon Pay UPI', 'UPI', 'Paytm Wallet'],
-    ['UPI', 'IMPS', 'NEFT / RTGS', 'Digital eRupee'],
-    ['Google Pay (GPay)', 'PhonePe', 'CRED Pay', 'Digital eRupee'],
-    ['BHIM UPI', 'Paytm UPI', 'IMPS', 'UPI'],
-    ['PhonePe', 'Amazon Pay UPI', 'IMPS', 'NEFT / RTGS'],
+    ['UPI', 'UPI QR Scan', 'Google Pay (GPay)', 'PhonePe', 'IMPS'],
+    ['PhonePe', 'Paytm UPI', 'BHIM UPI', 'UPI', 'UPI Lite'],
+    ['Google Pay (GPay)', 'CRED Pay', 'UPI', 'UPI QR Scan', 'IMPS'],
+    ['Paytm UPI', 'Amazon Pay UPI', 'UPI', 'Paytm Wallet', 'MobiKwik UPI'],
+    ['UPI', 'IMPS', 'NEFT / RTGS', 'Digital eRupee', 'SBI YONO Pay'],
+    ['Google Pay (GPay)', 'PhonePe', 'CRED Pay', 'Digital eRupee', 'HDFC PayZapp'],
+    ['BHIM UPI', 'Paytm UPI', 'IMPS', 'UPI', 'ICICI iMobile Pay'],
+    ['PhonePe', 'Amazon Pay UPI', 'IMPS', 'NEFT / RTGS', 'Kotak 811'],
+    ['WhatsApp Pay (UPI)', 'UPI', 'Google Pay (GPay)', 'UPI QR Scan'],
+    ['MobiKwik UPI', 'Freecharge UPI', 'Paytm UPI', 'UPI', 'Airtel Payments Bank'],
+    ['SBI YONO Pay', 'HDFC PayZapp', 'ICICI iMobile Pay', 'IMPS', 'Bank Transfer'],
+    ['UPI', 'Cash Deposit (CDM)', 'IMPS', 'NEFT / RTGS'],
+    ['UPI Lite', 'UPI QR Scan', 'PhonePe', 'Paytm UPI', 'Digital eRupee'],
+    ['Kotak 811', 'Airtel Payments Bank', 'UPI', 'WhatsApp Pay (UPI)', 'IMPS'],
   ];
 
   const reviewerNames = [
     'Rajesh_M', 'Sneha_K', 'Vikash_P', 'Neha_S', 'Amitabh_R', 'Pooja_D', 'Tarun_G', 'Kiran_V',
     'Shubham_T', 'Riya_B', 'Abhishek_N', 'Pallavi_C', 'Sagar_J', 'Meenakshi_I', 'Vivek_A', 'Nisha_L',
+    'Harish_K', 'Divya_R', 'Rohan_S', 'Ankita_P', 'Nikhil_V', 'Swati_G', 'Prashant_M', 'Kavita_D',
   ];
 
   const positiveComments = [
@@ -1287,6 +1341,8 @@ function generateExtraIndianP2POffers(): P2POffer[] {
     'Completed ₹1,00,000 order cleanly, highly trusted Indian merchant.',
     'Fast PhonePe transfer and polite communication throughout.',
     'Safe Digital eRupee / UPI payout, definitely trading again.',
+    'Consistent pricing between ₹5,000 and ₹1,00,000, quick UTR confirmation.',
+    'Zero bank freeze risk—clean KYC verified Indian counterparty.',
   ];
 
   const hashUnit = (seed: number) => {
@@ -1296,7 +1352,7 @@ function generateExtraIndianP2POffers(): P2POffer[] {
 
   const extraOffers: P2POffer[] = [];
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < sellerHandles.length; i++) {
     const r1 = hashUnit(i + 11);
     const r2 = hashUnit(i + 101);
     const r3 = hashUnit(i + 211);
@@ -1327,7 +1383,26 @@ function generateExtraIndianP2POffers(): P2POffer[] {
         paymentMethod: methods[1] ?? methods[0],
         dateLabel: `${(i % 5) + 1}d ago`,
       },
+      {
+        id: `rev-xs-${i}-3`,
+        reviewer: reviewerNames[(i * 2 + 7) % reviewerNames.length],
+        rating: 5,
+        comment: positiveComments[(i + 5) % positiveComments.length],
+        paymentMethod: methods[2] ?? methods[0],
+        dateLabel: `${(i % 8) + 2}d ago`,
+      },
     ];
+
+    const inrBands: Array<[number, number]> = [
+      [300, 50000],
+      [300, 50000],
+      [300, 50000],
+      [300, 50000],
+      [300, 50000],
+      [300, 50000],
+    ];
+    const [bandMin, bandMax] = inrBands[i % inrBands.length];
+    const bandLabel = `${bandMin.toLocaleString('en-IN')} INR to ${bandMax.toLocaleString('en-IN')} INR`;
 
     extraOffers.push({
       id: `p2p-s-in-${i + 30}`,
@@ -1340,7 +1415,7 @@ function generateExtraIndianP2POffers(): P2POffer[] {
       completionRate,
       avgReleaseMinutes: 2 + (i % 5),
       location: city,
-      bio: `Verified ${city.split(',')[0]} USDT seller supporting ${methods.slice(0, 3).join(', ')} for ₹5,000–₹1,00,000 orders.`,
+      bio: `Verified ${city.split(',')[0]} USDT seller supporting ${methods.slice(0, 3).join(', ')} (${bandLabel}).`,
       rating,
       positiveRate,
       reviewsCount,
@@ -1351,15 +1426,15 @@ function generateExtraIndianP2POffers(): P2POffer[] {
       fiat: 'INR',
       price: buyPrice,
       availableAmount: Math.floor(6500 + r2 * 58000),
-      minLimit: 5000,
-      maxLimit: 100000,
+      minLimit: bandMin,
+      maxLimit: bandMax,
       paymentMethods: methods,
       paymentWindowMinutes: 15,
-      terms: `PAN-verified accounts only (₹5,000 to ₹1,00,000). Instant release after UTR verification on ${methods[0]}.`,
+      terms: `PAN-verified accounts only (${bandLabel}). Instant release after UTR verification on ${methods[0]}.`,
     });
   }
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < buyerHandles.length; i++) {
     const r1 = hashUnit(i + 503);
     const r2 = hashUnit(i + 709);
     const r3 = hashUnit(i + 911);
@@ -1390,7 +1465,26 @@ function generateExtraIndianP2POffers(): P2POffer[] {
         paymentMethod: methods[1] ?? methods[0],
         dateLabel: `${(i % 4) + 1}d ago`,
       },
+      {
+        id: `rev-xb-${i}-3`,
+        reviewer: reviewerNames[(i * 3 + 9) % reviewerNames.length],
+        rating: 5,
+        comment: positiveComments[(i + 6) % positiveComments.length],
+        paymentMethod: methods[2] ?? methods[0],
+        dateLabel: `${(i % 7) + 2}d ago`,
+      },
     ];
+
+    const inrBands: Array<[number, number]> = [
+      [300, 50000],
+      [300, 50000],
+      [300, 50000],
+      [300, 50000],
+      [300, 50000],
+      [300, 50000],
+    ];
+    const [bandMin, bandMax] = inrBands[i % inrBands.length];
+    const bandLabel = `${bandMin.toLocaleString('en-IN')} INR to ${bandMax.toLocaleString('en-IN')} INR`;
 
     extraOffers.push({
       id: `p2p-b-in-${i + 30}`,
@@ -1403,7 +1497,7 @@ function generateExtraIndianP2POffers(): P2POffer[] {
       completionRate,
       avgReleaseMinutes: 2 + (i % 5),
       location: city,
-      bio: `Active ${city.split(',')[0]} USDT buyer offering clean instant INR payouts via ${methods.slice(0, 3).join(', ')}.`,
+      bio: `Active ${city.split(',')[0]} USDT buyer offering clean instant INR payouts via ${methods.slice(0, 3).join(', ')} (${bandLabel}).`,
       rating,
       positiveRate,
       reviewsCount,
@@ -1414,18 +1508,361 @@ function generateExtraIndianP2POffers(): P2POffer[] {
       fiat: 'INR',
       price: sellPrice,
       availableAmount: Math.floor(8000 + r2 * 72000),
-      minLimit: 5000,
-      maxLimit: 100000,
+      minLimit: bandMin,
+      maxLimit: bandMax,
       paymentMethods: methods,
       paymentWindowMinutes: 15,
-      terms: `Clean verified INR payouts from ₹5,000 to ₹1,00,000 via ${methods.slice(0, 2).join(' or ')}. Zero lien guarantee.`,
+      terms: `Clean verified INR payouts (${bandLabel}) via ${methods.slice(0, 2).join(' or ')}. Zero lien guarantee.`,
     });
   }
 
   return extraOffers;
 }
 
-INITIAL_P2P_OFFERS.push(...generateExtraIndianP2POffers());
+function generateExtraUsdP2POffers(): P2POffer[] {
+  const usdCities = [
+    'New York, NY', 'Austin, TX', 'Miami, FL', 'San Francisco, CA', 'Chicago, IL',
+    'Seattle, WA', 'Boston, MA', 'Denver, CO', 'Atlanta, GA', 'Dallas, TX',
+    'Phoenix, AZ', 'Charlotte, NC', 'San Diego, CA', 'Tampa, FL', 'Nashville, TN',
+  ];
+  const usdPools: PaymentMethodType[][] = [
+    ['Zelle', 'UPI', 'Paytm UPI', 'Wise'],
+    ['Wise', 'PhonePe', 'UPI', 'Bank Transfer'],
+    ['Revolut', 'Google Pay (GPay)', 'UPI', 'Paytm UPI'],
+    ['Bank Transfer', 'Zelle', 'Paytm Wallet', 'UPI'],
+    ['UPI', 'Paytm UPI', 'PhonePe', 'Google Pay (GPay)', 'Wise'],
+    ['UPI QR Scan', 'UPI Lite', 'BHIM UPI', 'CRED Pay', 'Zelle'],
+    ['Amazon Pay UPI', 'WhatsApp Pay (UPI)', 'MobiKwik UPI', 'Freecharge UPI', 'Wise'],
+    ['SBI YONO Pay', 'HDFC PayZapp', 'ICICI iMobile Pay', 'Kotak 811', 'Bank Transfer'],
+    ['Airtel Payments Bank', 'IMPS', 'NEFT / RTGS', 'Digital eRupee', 'Cash Deposit (CDM)'],
+  ];
+  const hashUnit = (seed: number) => {
+    const x = Math.sin(seed * 7919 + 31337) * 197431;
+    return x - Math.floor(x);
+  };
+
+  const usdSellerNames = [
+    'Crypto_Trade_Company', 'Apex_Digital_Holdings', 'Summit_OTC_Partners', 'Vanguard_Coin_Group', 'Meridian_Asset_Desk',
+    'Liberty_FX_Capital', 'Horizon_Crypto_Corp', 'Atlas_Liquidity_Inc', 'Beacon_Digital_Trade', 'Sterling_Vault_OTC',
+    'Crestline_Coin_Co', 'Pacific_Block_Ventures', 'Northstar_Crypto_LLC', 'Titan_Escrow_Group', 'Monarch_Asset_Corp',
+    'Keystone_OTC_Trading', 'Emerald_FX_Solutions', 'Sapphire_Coin_Desk', 'Citadel_Trade_Partners', 'Bridgewater_Crypto_Co',
+    'Redwood_Digital_Group', 'Solstice_OTC_Holdings', 'Aegis_Liquidity_Corp', 'Noble_Chain_Ventures', 'Clearwater_Coin_Inc',
+    'Harborview_Crypto_Co', 'Centurion_OTC_Desk', 'Evergreen_Digital_LLC', 'Falcon_Block_Capital', 'Granite_Coin_Partners',
+    'Silverline_Trade_Corp', 'Paramount_OTC_Group', 'Westcoast_Crypto_Inc', 'Bluechip_Coin_Holdings', 'Anchor_Digital_Desk',
+    'Ironbridge_FX_Co', 'Valiant_Crypto_Group', 'Crown_Liquidity_LLC', 'Obsidian_OTC_Corp', 'Pinnacle_Coin_Trade',
+    'SummitView_Digital_Co', 'Oakridge_Asset_Group', 'Vertex_Block_Holdings', 'Cardinal_Crypto_Desk', 'DeltaForce_Coin_LLC',
+    'Vantage_OTC_Solutions', 'Sequoia_Trade_Corp', 'Broadstreet_Crypto_Co', 'Keystone_Block_Inc', 'Hudson_Digital_Desk',
+    'Bayside_Coin_Partners', 'Canyon_OTC_Capital', 'Metro_Crypto_Exchange', 'Alliance_Digital_Corp', 'Landmark_Coin_Group',
+    'United_Asset_Trading', 'FirstChoice_Crypto_Co', 'Zenith_Block_Partners', 'AlphaGate_OTC_LLC', 'Goldcrest_Coin_Corp',
+    'Riverstone_Trade_Co', 'Skyline_Digital_Group', 'Vector_Liquidity_Inc', 'PrimePeak_Crypto_LLC', 'PacificRim_OTC_Corp',
+  ];
+
+  const usdBuyerNames = [
+    'Nova_Capital_Exchange', 'Crescent_Cash_Corp', 'Pacific_Escrow_Group', 'Keystone_USDT_Desk', 'Harbor_Settlement_Co',
+    'Trinity_Pay_Holdings', 'Monarch_Digital_OTC', 'Pinnacle_Liquidity_Co', 'Ironclad_Coin_Group', 'Emerald_Trade_Desk',
+    'Sovereign_Crypto_Corp', 'Global_Coin_Ventures', 'Metro_Escrow_Partners', 'Beacon_Cash_Holdings', 'Summit_Settlement_LLC',
+    'Liberty_Coin_Buyers', 'Vanguard_Pay_Group', 'Apex_Settlement_Desk', 'Atlas_Escrow_Capital', 'Sterling_Cash_Partners',
+    'Horizon_Pay_Ventures', 'Meridian_Coin_Group', 'Citadel_Cash_Corp', 'Redwood_Escrow_LLC', 'Northstar_Pay_Trading',
+    'Silvergate_Coin_Desk', 'Broadview_Crypto_Corp', 'Clearwater_Pay_Group', 'Anchor_Cash_Holdings', 'Granite_Escrow_Inc',
+    'Falcon_Settlement_Co', 'Evergreen_Cash_Desk', 'Crest_Digital_Buyers', 'Bridge_Capital_OTC', 'Westside_Coin_Corp',
+    'Oakridge_Pay_Partners', 'Centurion_Cash_Group', 'Hudson_Escrow_Desk', 'Bayside_Settlement_Co', 'Canyon_Coin_Buyers',
+    'Paramount_Cash_LLC', 'Cardinal_Pay_Holdings', 'Goldcrest_Escrow_Co', 'Skyline_Coin_Capital', 'Alpha_Settlement_Corp',
+    'Zenith_Cash_Partners', 'Vector_Escrow_Group', 'Landmark_Pay_Trading', 'FirstLine_Coin_Corp', 'Valley_Crypto_Buyers',
+    'Riverview_Cash_Desk', 'Crown_Settlement_LLC', 'PrimeLine_Coin_Group', 'Pacific_Pay_Ventures', 'United_Escrow_Corp',
+    'Vertex_Cash_Holdings', 'Obsidian_Pay_Group', 'Alliance_Coin_Buyers', 'Diamond_Escrow_Desk', 'Royal_Settlement_Co',
+    'Pioneer_Cash_Corp', 'Fortune_Coin_Partners', 'Reliance_Pay_Group', 'Continental_Crypto_Co', 'Grand_Escrow_Capital',
+  ];
+
+  const list: P2POffer[] = [];
+  for (let i = 0; i < 65; i++) {
+    const r1 = hashUnit(i + 23);
+    const r2 = hashUnit(i + 137);
+    const buyPrice = Number((1.001 + r1 * 0.012).toFixed(3));
+    const sellPrice = Number((0.994 + r2 * 0.008).toFixed(3));
+    const methods = usdPools[i % usdPools.length];
+    const city = usdCities[i % usdCities.length];
+    const completedOrders = Math.floor(720 + r1 * 6400);
+    const completionRate = Number((98.7 + r2 * 1.2).toFixed(1));
+    const rating = Number((4.8 + r1 * 0.2).toFixed(1));
+    list.push({
+      id: `p2p-s-usd-${i + 20}`,
+      merchantSide: 'SELL',
+      merchantId: `m-usd-s-${i + 20}`,
+      merchantName: usdSellerNames[i],
+      isVerified: i % 8 !== 0,
+      isOnline: i % 11 !== 0,
+      completedOrders,
+      completionRate,
+      avgReleaseMinutes: 3 + (i % 5),
+      location: city,
+      bio: `Verified USD & cross-border USDT liquidity company in ${city} supporting ${methods.join(', ')}.`,
+      rating,
+      positiveRate: 99.2,
+      reviewsCount: Math.floor(completedOrders * 0.28),
+      quoteBuyPrice: buyPrice,
+      quoteSellPrice: sellPrice,
+      asset: 'USDT',
+      fiat: 'USD',
+      price: buyPrice,
+      availableAmount: Math.floor(12000 + r2 * 95000),
+      minLimit: 50,
+      maxLimit: 25000,
+      paymentMethods: methods,
+      paymentWindowMinutes: 15,
+      terms: `Same-name ${methods.slice(0, 2).join(' / ')} transfer. Instant USDT escrow release.`,
+    });
+
+    list.push({
+      id: `p2p-b-usd-${i + 20}`,
+      merchantSide: 'BUY',
+      merchantId: `m-usd-b-${i + 20}`,
+      merchantName: usdBuyerNames[i],
+      isVerified: i % 9 !== 0,
+      isOnline: i % 12 !== 0,
+      completedOrders: Math.floor(680 + r2 * 5900),
+      completionRate,
+      avgReleaseMinutes: 3 + (i % 6),
+      location: usdCities[(i + 4) % usdCities.length],
+      bio: `Active USD & NRI OTC buyer offering instant ${methods.join(' & ')} settlement.`,
+      rating,
+      positiveRate: 99.1,
+      reviewsCount: Math.floor(completedOrders * 0.26),
+      quoteBuyPrice: buyPrice,
+      quoteSellPrice: sellPrice,
+      asset: 'USDT',
+      fiat: 'USD',
+      price: sellPrice,
+      availableAmount: Math.floor(15000 + r1 * 88000),
+      minLimit: 50,
+      maxLimit: 25000,
+      paymentMethods: methods,
+      paymentWindowMinutes: 15,
+      terms: `Instant payout via ${methods.slice(0, 3).join(' / ')}.`,
+    });
+  }
+
+  const otherFiats: Array<{ fiat: FiatCurrency; buyBase: number; sellBase: number; min: number; max: number; local: PaymentMethodType }> = [
+    { fiat: 'EUR', buyBase: 0.925, sellBase: 0.916, min: 50, max: 20000, local: 'SEPA Instant' },
+    { fiat: 'GBP', buyBase: 0.786, sellBase: 0.778, min: 50, max: 15000, local: 'Faster Payments' },
+    { fiat: 'AED', buyBase: 3.685, sellBase: 3.662, min: 200, max: 80000, local: 'Bank Transfer' },
+    { fiat: 'NGN', buyBase: 1658.0, sellBase: 1642.0, min: 10000, max: 5000000, local: 'Bank Transfer' },
+  ];
+
+  otherFiats.forEach((cfg, fIdx) => {
+    for (let j = 0; j < 6; j++) {
+      const rails: PaymentMethodType[] = [cfg.local, 'UPI', 'Paytm UPI', 'PhonePe', 'Google Pay (GPay)'];
+      list.push({
+        id: `p2p-s-${cfg.fiat.toLowerCase()}-upi-${j + 1}`,
+        merchantSide: 'SELL',
+        merchantId: `m-${cfg.fiat.toLowerCase()}-s-${j + 1}`,
+        merchantName: `${cfg.fiat}_PrimeDesk_${j + 1}`,
+        isVerified: true,
+        isOnline: true,
+        completedOrders: 1400 + j * 410 + fIdx * 200,
+        completionRate: 99.4,
+        avgReleaseMinutes: 4,
+        location: `${cfg.fiat} Global Desk`,
+        bio: `Fast ${cfg.fiat} & UPI USDT liquidity provider.`,
+        rating: 4.9,
+        positiveRate: 99.4,
+        reviewsCount: 420 + j * 80,
+        asset: 'USDT',
+        fiat: cfg.fiat,
+        price: Number((cfg.buyBase * (1 + j * 0.0015)).toFixed(cfg.fiat === 'NGN' ? 2 : 3)),
+        availableAmount: 35000,
+        minLimit: cfg.min,
+        maxLimit: cfg.max,
+        paymentMethods: rails,
+        paymentWindowMinutes: 15,
+        terms: `Fast ${cfg.local} / UPI settlement.`,
+      });
+      list.push({
+        id: `p2p-b-${cfg.fiat.toLowerCase()}-upi-${j + 1}`,
+        merchantSide: 'BUY',
+        merchantId: `m-${cfg.fiat.toLowerCase()}-b-${j + 1}`,
+        merchantName: `${cfg.fiat}_CashBuyer_${j + 1}`,
+        isVerified: true,
+        isOnline: true,
+        completedOrders: 1250 + j * 390 + fIdx * 180,
+        completionRate: 99.3,
+        avgReleaseMinutes: 4,
+        location: `${cfg.fiat} OTC Desk`,
+        bio: `Instant ${cfg.fiat} & UPI USDT cashout desk.`,
+        rating: 4.9,
+        positiveRate: 99.3,
+        reviewsCount: 380 + j * 75,
+        asset: 'USDT',
+        fiat: cfg.fiat,
+        price: Number((cfg.sellBase * (1 - j * 0.0012)).toFixed(cfg.fiat === 'NGN' ? 2 : 3)),
+        availableAmount: 38000,
+        minLimit: cfg.min,
+        maxLimit: cfg.max,
+        paymentMethods: rails,
+        paymentWindowMinutes: 15,
+        terms: `Clean ${cfg.local} / UPI payouts 24x7.`,
+      });
+    }
+  });
+
+  return list;
+}
+
+function generateFeaturedUpiPaytmPhonePeOffers(): P2POffer[] {
+  const upiSellDesks = [
+    { name: 'PaytmSwift_OTC', city: 'New Delhi, DL', price: 105.0, buyQ: 105.85, orders: 4820, comp: 99.8, pos: 99.6, win: 15, avail: 48500, rails: ['UPI', 'Paytm UPI', 'PhonePe', 'Paytm Wallet'] as PaymentMethodType[] },
+    { name: 'PhonePePrime_IN', city: 'Bengaluru, KA', price: 104.96, buyQ: 105.6, orders: 3940, comp: 99.7, pos: 99.5, win: 15, avail: 36200, rails: ['PhonePe', 'UPI', 'Paytm UPI', 'Google Pay (GPay)'] as PaymentMethodType[] },
+    { name: 'MumbaiUPI_Vault', city: 'Mumbai, MH', price: 104.92, buyQ: 105.45, orders: 6150, comp: 99.9, pos: 99.8, win: 15, avail: 74000, rails: ['UPI', 'Paytm UPI', 'Paytm Wallet', 'Google Pay (GPay)'] as PaymentMethodType[] },
+    { name: 'PaytmDirect_Hyd', city: 'Hyderabad, TS', price: 104.88, buyQ: 105.5, orders: 2790, comp: 99.5, pos: 99.4, win: 15, avail: 29800, rails: ['Paytm UPI', 'Paytm Wallet', 'PhonePe', 'UPI'] as PaymentMethodType[] },
+    { name: 'BharatPhone_Desk', city: 'Pune, MH', price: 104.85, buyQ: 105.4, orders: 3310, comp: 99.6, pos: 99.3, win: 15, avail: 41000, rails: ['PhonePe', 'UPI', 'UPI QR Scan', 'Paytm UPI'] as PaymentMethodType[] },
+    { name: 'JaipurPaytm_Pro', city: 'Jaipur, RJ', price: 104.82, buyQ: 105.35, orders: 2180, comp: 99.4, pos: 99.2, win: 15, avail: 24600, rails: ['Paytm UPI', 'UPI', 'PhonePe', 'IMPS'] as PaymentMethodType[] },
+    { name: 'ChennaiUPI_Cash', city: 'Chennai, TN', price: 104.78, buyQ: 105.3, orders: 1940, comp: 99.3, pos: 99.1, win: 15, avail: 31500, rails: ['UPI', 'PhonePe', 'Paytm UPI', 'Digital eRupee'] as PaymentMethodType[] },
+    { name: 'SuratPhonePe_OTC', city: 'Surat, GJ', price: 104.75, buyQ: 105.25, orders: 2560, comp: 99.5, pos: 99.3, win: 15, avail: 38900, rails: ['PhonePe', 'Paytm Wallet', 'UPI', 'Google Pay (GPay)'] as PaymentMethodType[] },
+    { name: 'NoidaPaytm_Hub', city: 'Noida, UP', price: 104.72, buyQ: 105.2, orders: 1670, comp: 99.2, pos: 99.0, win: 15, avail: 22400, rails: ['Paytm UPI', 'Paytm Wallet', 'UPI', 'PhonePe'] as PaymentMethodType[] },
+    { name: 'KochiPhonePay_IN', city: 'Kochi, KL', price: 104.68, buyQ: 105.15, orders: 1420, comp: 99.1, pos: 99.0, win: 15, avail: 19800, rails: ['PhonePe', 'UPI', 'Paytm UPI', 'BHIM UPI'] as PaymentMethodType[] },
+    { name: 'IndoreUPI_Fast', city: 'Indore, MP', price: 104.64, buyQ: 105.1, orders: 1890, comp: 99.3, pos: 99.1, win: 15, avail: 27400, rails: ['UPI', 'Paytm UPI', 'PhonePe', 'CRED Pay'] as PaymentMethodType[] },
+    { name: 'ChandigarhPay_P2P', city: 'Chandigarh, CH', price: 104.6, buyQ: 105.05, orders: 2310, comp: 99.4, pos: 99.2, win: 15, avail: 34000, rails: ['Paytm UPI', 'PhonePe', 'UPI', 'Google Pay (GPay)'] as PaymentMethodType[] },
+    { name: 'AhmedabadUPI_Pro', city: 'Ahmedabad, GJ', price: 104.56, buyQ: 105.0, orders: 2980, comp: 99.5, pos: 99.3, win: 15, avail: 44500, rails: ['UPI', 'Paytm Wallet', 'PhonePe', 'IMPS'] as PaymentMethodType[] },
+    { name: 'KolkataPaytm_Desk', city: 'Kolkata, WB', price: 104.52, buyQ: 104.95, orders: 1750, comp: 99.2, pos: 99.1, win: 15, avail: 28100, rails: ['Paytm UPI', 'PhonePe', 'UPI', 'Digital eRupee'] as PaymentMethodType[] },
+    { name: 'LucknowPhonePe_P2P', city: 'Lucknow, UP', price: 104.48, buyQ: 104.9, orders: 1530, comp: 99.1, pos: 98.9, win: 15, avail: 21700, rails: ['PhonePe', 'Paytm UPI', 'UPI', 'Paytm Wallet'] as PaymentMethodType[] },
+  ];
+
+  const upiBuyDesks = [
+    { name: 'PaytmSeller_Direct', city: 'Mumbai, MH', price: 103.2, sellQ: 102.72, orders: 5120, comp: 99.8, pos: 99.7, win: 15, avail: 52000, rails: ['UPI', 'Paytm UPI', 'PhonePe', 'Paytm Wallet'] as PaymentMethodType[] },
+    { name: 'PhonePeExpress_IN', city: 'Bengaluru, KA', price: 103.24, sellQ: 102.75, orders: 4380, comp: 99.7, pos: 99.6, win: 15, avail: 41200, rails: ['PhonePe', 'UPI', 'Paytm UPI', 'Google Pay (GPay)'] as PaymentMethodType[] },
+    { name: 'DelhiPaytm_OTC', city: 'New Delhi, DL', price: 103.28, sellQ: 102.8, orders: 3890, comp: 99.6, pos: 99.5, win: 15, avail: 37600, rails: ['Paytm UPI', 'Paytm Wallet', 'UPI', 'PhonePe'] as PaymentMethodType[] },
+    { name: 'UPIInstant_Hyd', city: 'Hyderabad, TS', price: 103.32, sellQ: 102.85, orders: 2940, comp: 99.5, pos: 99.4, win: 15, avail: 33400, rails: ['UPI', 'PhonePe', 'Google Pay (GPay)', 'Paytm UPI'] as PaymentMethodType[] },
+    { name: 'PunePhonePe_Desk', city: 'Pune, MH', price: 103.36, sellQ: 102.9, orders: 2470, comp: 99.4, pos: 99.3, win: 15, avail: 28900, rails: ['PhonePe', 'Paytm UPI', 'UPI', 'UPI QR Scan'] as PaymentMethodType[] },
+    { name: 'GujaratPaytm_P2P', city: 'Ahmedabad, GJ', price: 103.4, sellQ: 102.94, orders: 3150, comp: 99.5, pos: 99.4, win: 15, avail: 44100, rails: ['Paytm UPI', 'UPI', 'Paytm Wallet', 'PhonePe'] as PaymentMethodType[] },
+    { name: 'JaipurPhonePe_IN', city: 'Jaipur, RJ', price: 103.44, sellQ: 102.98, orders: 1960, comp: 99.3, pos: 99.1, win: 15, avail: 25300, rails: ['PhonePe', 'UPI', 'Paytm UPI', 'IMPS'] as PaymentMethodType[] },
+    { name: 'GurugramPaytm_Pro', city: 'Gurugram, HR', price: 103.48, sellQ: 103.02, orders: 2740, comp: 99.4, pos: 99.2, win: 15, avail: 31800, rails: ['Paytm UPI', 'Paytm Wallet', 'PhonePe', 'UPI'] as PaymentMethodType[] },
+    { name: 'ChennaiPhonePay_IN', city: 'Chennai, TN', price: 103.52, sellQ: 103.06, orders: 2110, comp: 99.2, pos: 99.0, win: 15, avail: 26700, rails: ['PhonePe', 'UPI', 'Paytm UPI', 'BHIM UPI'] as PaymentMethodType[] },
+    { name: 'KolkataUPI_Prime', city: 'Kolkata, WB', price: 103.56, sellQ: 103.1, orders: 2390, comp: 99.3, pos: 99.2, win: 15, avail: 29400, rails: ['UPI', 'Paytm UPI', 'PhonePe', 'Digital eRupee'] as PaymentMethodType[] },
+    { name: 'IndorePaytm_OTC', city: 'Indore, MP', price: 103.6, sellQ: 103.14, orders: 1780, comp: 99.2, pos: 99.1, win: 15, avail: 23500, rails: ['Paytm UPI', 'PhonePe', 'UPI', 'Paytm Wallet'] as PaymentMethodType[] },
+    { name: 'SuratUPI_Exchange', city: 'Surat, GJ', price: 103.64, sellQ: 103.18, orders: 2040, comp: 99.4, pos: 99.2, win: 15, avail: 35600, rails: ['UPI', 'Google Pay (GPay)', 'PhonePe', 'Paytm UPI'] as PaymentMethodType[] },
+    { name: 'NagpurPhonePe_Hub', city: 'Nagpur, MH', price: 103.68, sellQ: 103.22, orders: 1620, comp: 99.1, pos: 99.0, win: 15, avail: 19900, rails: ['PhonePe', 'Paytm UPI', 'UPI', 'CRED Pay'] as PaymentMethodType[] },
+    { name: 'BhopalPaytm_Cash', city: 'Bhopal, MP', price: 103.72, sellQ: 103.26, orders: 1490, comp: 99.0, pos: 98.9, win: 15, avail: 18400, rails: ['Paytm UPI', 'Paytm Wallet', 'UPI', 'PhonePe'] as PaymentMethodType[] },
+    { name: 'VizagUPI_Direct', city: 'Visakhapatnam, AP', price: 103.76, sellQ: 103.3, orders: 1830, comp: 99.3, pos: 99.1, win: 15, avail: 27200, rails: ['UPI', 'PhonePe', 'Paytm UPI', 'Google Pay (GPay)'] as PaymentMethodType[] },
+  ];
+
+  const out: P2POffer[] = [];
+  const upiBands: Array<[number, number]> = [
+    [300, 50000],
+    [300, 50000],
+    [300, 50000],
+    [300, 50000],
+    [300, 50000],
+    [300, 50000],
+    [300, 50000],
+  ];
+
+  upiSellDesks.forEach((d, idx) => {
+    const [bandMin, bandMax] = upiBands[idx % upiBands.length];
+    const bandLabel = `${bandMin.toLocaleString('en-IN')} INR to ${bandMax.toLocaleString('en-IN')} INR`;
+    out.push({
+      id: `p2p-b-upi-${idx + 1}`,
+      merchantSide: 'BUY',
+      merchantId: `m-in-upi-b-${idx + 1}`,
+      merchantName: d.name,
+      isVerified: true,
+      isOnline: true,
+      completedOrders: d.orders,
+      completionRate: d.comp,
+      avgReleaseMinutes: 2 + (idx % 3),
+      location: d.city,
+      bio: `Instant ${d.city.split(',')[0]} USDT buyer paying 24x7 via UPI, Paytm UPI, Paytm Wallet & PhonePe (${bandLabel}).`,
+      rating: 4.9,
+      positiveRate: d.pos,
+      reviewsCount: Math.round(d.orders * 0.34),
+      reviews: [
+        {
+          id: `rev-upi-b-${idx}-1`,
+          reviewer: 'Rohit_M',
+          rating: 5,
+          comment: `Instant ${d.rails[0]} payout for ₹25,000 USDT sale within 60 seconds.`,
+          paymentMethod: d.rails[0],
+          dateLabel: `${idx + 1}h ago`,
+        },
+        {
+          id: `rev-upi-b-${idx}-2`,
+          reviewer: 'Ananya_S',
+          rating: 5,
+          comment: `Clean ${d.rails[1]} transfer, verified account and super responsive.`,
+          paymentMethod: d.rails[1],
+          dateLabel: '1d ago',
+        },
+      ],
+      quoteSellPrice: d.price,
+      quoteBuyPrice: d.buyQ,
+      asset: 'USDT',
+      fiat: 'INR',
+      price: d.price,
+      availableAmount: d.avail,
+      minLimit: bandMin,
+      maxLimit: bandMax,
+      paymentMethods: d.rails,
+      paymentWindowMinutes: d.win,
+      terms: `Instant UPI / Paytm / PhonePe payout (${bandLabel}). Verify credit before releasing USDT.`,
+    });
+  });
+
+  upiBuyDesks.forEach((d, idx) => {
+    const [bandMin, bandMax] = upiBands[idx % upiBands.length];
+    const bandLabel = `${bandMin.toLocaleString('en-IN')} INR to ${bandMax.toLocaleString('en-IN')} INR`;
+    out.push({
+      id: `p2p-s-upi-${idx + 1}`,
+      merchantSide: 'SELL',
+      merchantId: `m-in-upi-s-${idx + 1}`,
+      merchantName: d.name,
+      isVerified: true,
+      isOnline: true,
+      completedOrders: d.orders,
+      completionRate: d.comp,
+      avgReleaseMinutes: 2 + (idx % 3),
+      location: d.city,
+      bio: `Verified ${d.city.split(',')[0]} USDT seller accepting UPI, Paytm UPI, Paytm Wallet & PhonePe (${bandLabel}).`,
+      rating: 4.9,
+      positiveRate: d.pos,
+      reviewsCount: Math.round(d.orders * 0.32),
+      reviews: [
+        {
+          id: `rev-upi-s-${idx}-1`,
+          reviewer: 'Karan_P',
+          rating: 5,
+          comment: `Paid via ${d.rails[1]} and received USDT release in under 90 seconds.`,
+          paymentMethod: d.rails[1],
+          dateLabel: `${idx + 1}h ago`,
+        },
+        {
+          id: `rev-upi-s-${idx}-2`,
+          reviewer: 'Meera_V',
+          rating: 5,
+          comment: `Best rate using ${d.rails[0]}, smooth escrow process.`,
+          paymentMethod: d.rails[0],
+          dateLabel: '1d ago',
+        },
+      ],
+      quoteBuyPrice: d.price,
+      quoteSellPrice: d.sellQ,
+      asset: 'USDT',
+      fiat: 'INR',
+      price: d.price,
+      availableAmount: d.avail,
+      minLimit: bandMin,
+      maxLimit: bandMax,
+      paymentMethods: d.rails,
+      paymentWindowMinutes: d.win,
+      terms: `Send from your own KYC-verified UPI / Paytm / PhonePe account (${bandLabel}). Instant USDT release.`,
+    });
+  });
+
+  return out;
+}
+
+INITIAL_P2P_OFFERS.push(
+  ...generateFeaturedUpiPaytmPhonePeOffers(),
+  ...generateExtraIndianP2POffers(),
+  ...generateExtraUsdP2POffers()
+);
 
 export const INITIAL_BALANCES: Record<CryptoSymbol, WalletBalance> = {
   USDT: { spot: 12500.0, spotLocked: 0, funding: 3500.0, fundingLocked: 0 },
@@ -1450,6 +1887,20 @@ export const INITIAL_PAYMENT_METHODS: UserPaymentMethod[] = [
   },
   {
     id: 'pm-2',
+    type: 'PhonePe',
+    accountName: 'Alex Mercer',
+    accountNumber: 'alexmercer@ybl',
+    bankOrProvider: 'PhonePe / Yes Bank UPI',
+  },
+  {
+    id: 'pm-3',
+    type: 'UPI QR Scan',
+    accountName: 'Alex Mercer',
+    accountNumber: 'alexmercer@okicici',
+    bankOrProvider: 'Dynamic UPI QR (ICICI)',
+  },
+  {
+    id: 'pm-4',
     type: 'IMPS',
     accountName: 'Alex Mercer',
     accountNumber: '50100482910421',
@@ -1457,7 +1908,7 @@ export const INITIAL_PAYMENT_METHODS: UserPaymentMethod[] = [
     ifscCode: 'HDFC0001245',
   },
   {
-    id: 'pm-3',
+    id: 'pm-5',
     type: 'Wise',
     accountName: 'Alex Mercer',
     accountNumber: 'alex.mercer@wise-id.com',
