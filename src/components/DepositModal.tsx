@@ -53,10 +53,10 @@ export const DepositModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4" role="dialog" aria-modal="true" aria-labelledby="deposit-modal-title">
-      <div className="w-full max-w-lg rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-[#2B3139]">
-          <h2 id="deposit-modal-title" className="font-display text-lg font-semibold text-slate-900 dark:text-[#EAECEF]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="deposit-modal-title">
+      <div className="w-full max-w-lg rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 dark:border-[#2B3139] shrink-0">
+          <h2 id="deposit-modal-title" className="font-display text-base sm:text-lg font-semibold text-slate-900 dark:text-[#EAECEF]">
             Deposit Crypto to Spot Wallet
           </h2>
           <button
@@ -69,7 +69,7 @@ export const DepositModal: React.FC = () => {
           </button>
         </div>
 
-        <form onSubmit={handleInstantCredit} className="p-6 space-y-5">
+        <form onSubmit={handleInstantCredit} className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
           <div>
             <label className="block text-xs font-medium text-slate-500 dark:text-[#848E9C] mb-1.5">
               1. Select Coin

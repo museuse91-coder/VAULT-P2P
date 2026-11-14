@@ -40,8 +40,8 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({ symbol, cand
     if (!el) return;
     const obs = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const w = Math.max(300, Math.floor(entry.contentRect.width));
-        const h = Math.max(280, Math.floor(entry.contentRect.height));
+        const w = Math.max(240, Math.floor(entry.contentRect.width));
+        const h = Math.max(230, Math.floor(entry.contentRect.height));
         setSize({ width: w, height: h });
       }
     });
@@ -216,14 +216,14 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({ symbol, cand
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-200 dark:border-[#2B3139]">
-        <div className="flex items-center gap-1">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4 py-2 border-b border-slate-200 dark:border-[#2B3139]">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full">
           {TIMEFRAMES.map((tf) => (
             <button
               key={tf}
               type="button"
               onClick={() => setTimeframe(tf)}
-              className={`px-2.5 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+              className={`px-2 sm:px-2.5 py-1 rounded text-xs font-medium whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
                 timeframe === tf
                   ? 'bg-slate-200 dark:bg-[#2B3139] text-slate-900 dark:text-[#EAECEF]'
                   : 'text-slate-500 dark:text-[#848E9C] hover:text-slate-900 dark:hover:text-[#EAECEF]'
@@ -235,7 +235,7 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({ symbol, cand
         </div>
 
         {activeCandle && (
-          <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-slate-500 dark:text-[#848E9C] tabular-nums">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[11px] sm:text-xs text-slate-500 dark:text-[#848E9C] tabular-nums">
             <span className="text-slate-700 dark:text-[#EAECEF] font-semibold">{symbol}/USDT</span>
             <span>O <strong className="text-slate-900 dark:text-[#EAECEF]">{formatPrice(activeCandle.open)}</strong></span>
             <span>H <strong className="text-[#0ECB81]">{formatPrice(activeCandle.high)}</strong></span>
@@ -247,7 +247,7 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({ symbol, cand
         )}
       </div>
 
-      <div ref={containerRef} className="relative flex-1 min-h-[300px] w-full">
+      <div ref={containerRef} className="relative flex-1 min-h-[240px] sm:min-h-[300px] w-full overflow-hidden">
         <canvas
           ref={canvasRef}
           onMouseMove={handleMouseMove}

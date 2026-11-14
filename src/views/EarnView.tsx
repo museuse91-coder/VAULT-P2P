@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { useExchange } from '../context/ExchangeContext';
-import { EARN_PRODUCTS } from '../data/seedData';
+import { EARN_PRODUCTS, FIAT_RATES } from '../data/seedData';
 import { EarnProduct } from '../types/exchange';
-import { formatCrypto, formatPrice } from '../utils/format';
+import { formatCrypto, formatFiat, formatPrice } from '../utils/format';
 import { CoinIcon } from '../components/CoinIcon';
 
 export const EarnView: React.FC = () => {
-  const { balances, markets, earnPositions, subscribeEarn, redeemEarn } = useExchange();
+  const { balances, markets, fiat, earnPositions, subscribeEarn, redeemEarn } = useExchange();
   const [filterType, setFilterType] = useState<'ALL' | 'FLEXIBLE' | 'LOCKED'>('ALL');
   const [selectedProduct, setSelectedProduct] = useState<EarnProduct | null>(null);
   const [stakeAmount, setStakeAmount] = useState<string>('');
@@ -42,33 +42,40 @@ export const EarnView: React.FC = () => {
   }, [selectedProduct, stakeAmount]);
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-5 border-b border-slate-200 dark:border-[#2B3139]">
+    <div className="max-w-[1440px] mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 pb-4 sm:pb-5 border-b border-slate-200 dark:border-[#2B3139]">
         <div>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-[#EAECEF]">
+          <h1 className="font-display text-xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-[#EAECEF]">
             Simple Earn Vaults
           </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-[#848E9C]">
+          <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-[#848E9C]">
             Earn daily yield on idle Spot assets with Flexible or Locked staking terms.
           </p>
         </div>
 
         <div className="text-left sm:text-right">
           <div className="text-xs text-slate-500 dark:text-[#848E9C]">Total Active Earn Value</div>
-          <div className="font-mono text-xl font-bold text-[#0ECB81] mt-0.5">
-            ${formatPrice(totalStakedUsd)}
+          <div className="font-mono text-xl font-bold text-[#0ECB81] mt-0.5 tabular-nums">
+            {fiat === 'USD'
+              ? `$${formatPrice(totalStakedUsd)}`
+              : formatFiat(totalStakedUsd * FIAT_RATES[fiat].rateFromUsd, fiat)}
           </div>
+          {fiat !== 'USD' && (
+            <div className="font-mono text-[11px] text-slate-500 dark:text-[#848E9C]">
+              ≈ ${formatPrice(totalStakedUsd)}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="flex items-center gap-1 p-1 rounded-md bg-slate-100 dark:bg-[#181A20] border border-slate-200 dark:border-[#2B3139] w-fit">
+      <div className="grid grid-cols-3 sm:inline-flex items-center gap-1 p-1 rounded-md bg-slate-100 dark:bg-[#181A20] border border-slate-200 dark:border-[#2B3139] w-full sm:w-fit">
         {(['ALL', 'FLEXIBLE', 'LOCKED'] as const).map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setFilterType(t)}
-            className={`px-3.5 py-1.5 rounded text-xs font-semibold cursor-pointer ${
+            className={`px-3 sm:px-3.5 py-1.5 rounded text-xs font-semibold cursor-pointer text-center ${
               filterType === t
                 ? 'bg-white dark:bg-[#2B3139] text-slate-900 dark:text-[#EAECEF]'
                 : 'text-slate-600 dark:text-[#848E9C]'
@@ -79,9 +86,37 @@ export const EarnView: React.FC = () => {
         ))}
       </div>
 
-      {/* Products Table */}
+      {/* Products Container */}
       <div className="rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="sm:hidden divide-y divide-slate-200 dark:divide-[#2B3139]">
+          {filteredProducts.map((prod) => (
+            <div key={`me-${prod.id}`} className="p-3.5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <CoinIcon symbol={prod.asset} size={28} />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm text-slate-900 dark:text-[#EAECEF]">{prod.asset}</span>
+                    <span className="font-mono text-sm font-bold text-[#0ECB81]">{prod.apr.toFixed(1)}% APR</span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-[#848E9C] truncate">
+                    {prod.type === 'FLEXIBLE' ? 'Flexible' : `${prod.durationDays}D Locked`} · Min {prod.minAmount} {prod.asset}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedProduct(prod);
+                  setStakeAmount(String(prod.minAmount * 5));
+                }}
+                className="px-3.5 py-1.5 rounded-md bg-[#F0B90B] hover:bg-[#D9A708] text-[#0B0E11] text-xs font-semibold shrink-0 cursor-pointer"
+              >
+                Subscribe
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-200 dark:border-[#2B3139] text-xs font-medium text-slate-500 dark:text-[#848E9C]">
@@ -186,8 +221,8 @@ export const EarnView: React.FC = () => {
 
       {/* Subscribe Modal */}
       {selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4" role="dialog" aria-modal="true">
-          <div className="w-full max-w-md rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-3 sm:p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-md rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-[#2B3139]">
               <h2 className="font-display text-base font-semibold text-slate-900 dark:text-[#EAECEF]">
                 Subscribe {selectedProduct.asset} ({selectedProduct.apr}% APR)

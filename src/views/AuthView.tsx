@@ -66,8 +66,8 @@ export const AuthView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      <div className="mb-6">
+    <div className="max-w-[1440px] mx-auto px-3 sm:px-6 py-4 sm:py-12">
+      <div className="mb-4 sm:mb-6">
         <button
           type="button"
           onClick={closeAuthPage}
@@ -78,9 +78,9 @@ export const AuthView: React.FC = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-stretch">
         {/* Left: Exchange Credentials & Escrow Overview */}
-        <div className="lg:col-span-6 flex flex-col justify-between p-8 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20]">
+        <div className="order-2 lg:order-1 lg:col-span-6 flex flex-col justify-between p-5 sm:p-8 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20]">
           <div className="space-y-6">
             <div>
               <p className="text-xs font-semibold text-[#F0B90B]">Vault P2P Account Access</p>
@@ -90,7 +90,7 @@ export const AuthView: React.FC = () => {
                   : 'Create your verified Vault P2P trading account.'}
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-[#848E9C] max-w-xl">
-                Access zero-fee peer-to-peer liquidity across 6 fiat currencies, live spot order books, instant zero-fee conversions, and flexible staking vaults from one unified wallet.
+                Access zero-fee INR & global peer-to-peer liquidity across UPI, IMPS, Digital eRupee, and 6 fiat currencies, live spot order books, 1% VDA TDS statements, and flexible staking vaults.
               </p>
             </div>
 
@@ -98,19 +98,19 @@ export const AuthView: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-[#EAECEF]">
                   <ShieldCheck className="w-4 h-4 text-[#0ECB81]" />
-                  <span>Protected P2P Escrow</span>
+                  <span>Protected INR & Global Escrow</span>
                 </div>
                 <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-[#848E9C]">
-                  Seller crypto remains locked in Vault Escrow until fiat settlement is verified by both parties.
+                  Seller crypto remains locked in Vault Escrow until UPI, IMPS, or bank settlement is verified by both parties.
                 </p>
               </div>
               <div>
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-[#EAECEF]">
                   <Lock className="w-4 h-4 text-[#F0B90B]" />
-                  <span>Spot & Funding Segregation</span>
+                  <span>VDA Tax & Wallet Segregation</span>
                 </div>
                 <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-[#848E9C]">
-                  Transfer instantly at zero fee between your Spot trading balance and P2P Funding wallet.
+                  Transfer at zero fee between Spot and Funding wallets and export Section 194S 1% TDS CSV reports anytime.
                 </p>
               </div>
             </div>
@@ -122,8 +122,8 @@ export const AuthView: React.FC = () => {
               <div className="text-slate-500 dark:text-[#848E9C] mt-0.5">P2P Taker Fee</div>
             </div>
             <div>
-              <div className="font-mono text-lg font-bold text-slate-900 dark:text-[#EAECEF]">10+</div>
-              <div className="text-slate-500 dark:text-[#848E9C] mt-0.5">Spot & P2P Assets</div>
+              <div className="font-mono text-lg font-bold text-slate-900 dark:text-[#EAECEF]">UPI · IMPS</div>
+              <div className="text-slate-500 dark:text-[#848E9C] mt-0.5">Instant INR Rails</div>
             </div>
             <div>
               <div className="font-mono text-lg font-bold text-slate-900 dark:text-[#EAECEF]">6</div>
@@ -133,7 +133,7 @@ export const AuthView: React.FC = () => {
         </div>
 
         {/* Right: Login / Sign Up Form Panel */}
-        <div className="lg:col-span-6 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] p-6 sm:p-8">
+        <div className="order-1 lg:order-2 lg:col-span-6 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] p-4 sm:p-8">
           {/* Mode Switch Tabs */}
           <div className="grid grid-cols-2 gap-1 p-1 rounded-md bg-slate-100 dark:bg-[#0B0E11] border border-slate-200 dark:border-[#2B3139] mb-6">
             <button
@@ -287,7 +287,7 @@ export const AuthView: React.FC = () => {
                   type="text"
                   required
                   autoComplete="name"
-                  placeholder="e.g. Jordan Vance"
+                  placeholder="e.g. Aarav Sharma"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-md border border-slate-200 dark:border-[#2B3139] bg-slate-50 dark:bg-[#0B0E11] text-sm text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B]"
@@ -395,7 +395,7 @@ export const AuthView: React.FC = () => {
                   className="mt-0.5 accent-[#F0B90B]"
                 />
                 <span>
-                  I agree to the Vault P2P Terms of Service, Escrow Rules, and AML Verification Policy.
+                  I agree to the Vault P2P Terms of Service, Escrow Rules, and India KYC / VDA Verification Policy.
                 </span>
               </label>
 

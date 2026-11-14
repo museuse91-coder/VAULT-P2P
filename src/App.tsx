@@ -2,6 +2,7 @@ import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { ExchangeProvider, useExchange } from './context/ExchangeContext';
 import { Navbar } from './components/Navbar';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { DepositModal } from './components/DepositModal';
 import { AuthView } from './views/AuthView';
 import { HomeView } from './views/HomeView';
@@ -25,10 +26,10 @@ const ExchangeShell: React.FC = () => {
   } = useExchange();
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-[#0F172A] dark:bg-[#0B0E11] dark:text-[#EAECEF] transition-colors">
+    <div className="min-h-dvh w-full max-w-full overflow-x-hidden flex flex-col bg-[#F8FAFC] text-[#0F172A] dark:bg-[#0B0E11] dark:text-[#EAECEF] transition-colors pb-16 md:pb-0">
       <Navbar />
 
-      <main className="flex-1">
+      <main className="flex-1 w-full">
         {authPage !== null ? (
           <AuthView />
         ) : (
@@ -43,10 +44,10 @@ const ExchangeShell: React.FC = () => {
         )}
       </main>
 
-      <footer className="border-t border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#0B0E11] mt-12">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-[#848E9C]">
+      <footer className="border-t border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#0B0E11] mt-8 sm:mt-12">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-5 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-[#848E9C] text-center sm:text-left">
           <div>Vault P2P Exchange · Zero-Fee Peer-to-Peer Escrow & Spot Trading</div>
-          <div className="flex flex-wrap items-center gap-5">
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-4 sm:gap-5">
             <button type="button" onClick={() => setActiveTab('home')} className="hover:text-slate-900 dark:hover:text-[#EAECEF] cursor-pointer">
               Home
             </button>
@@ -92,13 +93,14 @@ const ExchangeShell: React.FC = () => {
         </div>
       </footer>
 
+      <MobileBottomNav />
       <DepositModal />
 
       {toast && (
         <div
           role="status"
           aria-live="polite"
-          className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-md border text-xs font-semibold shadow-lg ${
+          className={`fixed bottom-20 md:bottom-5 left-3 right-3 sm:left-auto sm:right-5 z-50 px-4 py-3 rounded-md border text-xs font-semibold shadow-lg text-center sm:text-left ${
             toast.tone === 'success'
               ? 'bg-white dark:bg-[#181A20] border-[#0ECB81] text-[#0ECB81]'
               : toast.tone === 'error'

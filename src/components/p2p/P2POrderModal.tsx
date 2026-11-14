@@ -51,45 +51,56 @@ export const P2POrderModal: React.FC<P2POrderModalProps> = ({ offer, onClose, on
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4" role="dialog" aria-modal="true">
-      <div className="w-full max-w-2xl rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-[#2B3139]">
-          <div className="flex items-center gap-2.5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-3 sm:p-4" role="dialog" aria-modal="true">
+      <div className="w-full max-w-2xl rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 dark:border-[#2B3139] shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
             <CoinIcon symbol={offer.asset} size={24} />
-            <h2 className="font-display text-lg font-semibold text-slate-900 dark:text-[#EAECEF]">
+            <h2 className="font-display text-base sm:text-lg font-semibold text-slate-900 dark:text-[#EAECEF] truncate">
               {userSide === 'BUY' ? `Buy ${offer.asset} from Seller` : `Sell ${offer.asset} to Buyer`}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded text-slate-500 dark:text-[#848E9C] hover:bg-slate-100 dark:hover:bg-[#2B3139] cursor-pointer"
+            className="p-1.5 rounded text-slate-500 dark:text-[#848E9C] hover:bg-slate-100 dark:hover:bg-[#2B3139] cursor-pointer shrink-0"
             aria-label="Close modal"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-[#2B3139]">
+        <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-[#2B3139]">
           {/* Left: Merchant Terms */}
-          <div className="md:col-span-5 p-6 space-y-4 bg-slate-50/70 dark:bg-[#14171C]">
+          <div className="md:col-span-5 p-4 sm:p-6 space-y-4 bg-slate-50/70 dark:bg-[#14171C]">
             <div>
               <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-[#EAECEF]">
                 <span>{offer.merchantName}</span>
                 {offer.isVerified && <ShieldCheck className="w-4 h-4 text-[#F0B90B]" />}
               </div>
               <p className="mt-1 text-xs text-slate-500 dark:text-[#848E9C] tabular-nums">
-                {offer.completedOrders.toLocaleString()} orders · {offer.completionRate}% completion · {offer.avgReleaseMinutes}m avg release
+                {offer.completedOrders.toLocaleString('en-IN')} trades · {(offer.rating ?? 4.9).toFixed(1)} ★ ({offer.positiveRate ?? offer.completionRate}% positive) · {offer.avgReleaseMinutes}m release
               </p>
+              {offer.location && (
+                <p className="mt-0.5 text-[11px] text-slate-500 dark:text-[#848E9C]">{offer.location}</p>
+              )}
             </div>
 
             <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-[#2B3139] text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-500 dark:text-[#848E9C]">Price</span>
+                <span className="text-slate-500 dark:text-[#848E9C]">Order Price</span>
                 <span className="font-mono font-semibold text-slate-900 dark:text-[#EAECEF]">
                   {formatFiat(offer.price, offer.fiat)} / {offer.asset}
                 </span>
               </div>
+              {offer.quoteBuyPrice && offer.quoteSellPrice && (
+                <div className="flex justify-between">
+                  <span className="text-slate-500 dark:text-[#848E9C]">Desk Buy / Sell</span>
+                  <span className="font-mono text-[11px] text-slate-700 dark:text-[#EAECEF] tabular-nums">
+                    {formatFiat(offer.quoteBuyPrice, offer.fiat)} / {formatFiat(offer.quoteSellPrice, offer.fiat)}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-slate-500 dark:text-[#848E9C]">Available</span>
                 <span className="font-mono text-slate-900 dark:text-[#EAECEF]">

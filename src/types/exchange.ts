@@ -93,12 +93,22 @@ export interface SpotTradeExecution {
 }
 
 export type PaymentMethodType =
+  | 'UPI'
+  | 'Google Pay (GPay)'
+  | 'PhonePe'
+  | 'Paytm UPI'
+  | 'BHIM UPI'
+  | 'CRED Pay'
+  | 'Amazon Pay UPI'
+  | 'IMPS'
+  | 'NEFT / RTGS'
+  | 'Digital eRupee'
+  | 'Paytm Wallet'
   | 'Bank Transfer'
   | 'Wise'
   | 'Revolut'
   | 'SEPA Instant'
   | 'Zelle'
-  | 'UPI'
   | 'Faster Payments'
   | 'PayPal';
 
@@ -108,6 +118,16 @@ export interface UserPaymentMethod {
   accountName: string;
   accountNumber: string;
   bankOrProvider: string;
+  ifscCode?: string;
+}
+
+export interface P2PReview {
+  id: string;
+  reviewer: string;
+  rating: number;
+  comment: string;
+  paymentMethod: PaymentMethodType;
+  dateLabel: string;
 }
 
 export interface P2POffer {
@@ -125,9 +145,17 @@ export interface P2POffer {
   completedOrders: number;
   completionRate: number; // e.g. 99.4
   avgReleaseMinutes: number;
+  location?: string;
+  bio?: string;
+  rating?: number; // out of 5, e.g. 4.9
+  positiveRate?: number; // percentage, e.g. 99.6
+  reviewsCount?: number;
+  reviews?: P2PReview[];
+  quoteBuyPrice?: number; // merchant Buy USDT rate in fiat (user buys at this rate)
+  quoteSellPrice?: number; // merchant Sell USDT rate in fiat (user sells at this rate)
   asset: CryptoSymbol;
   fiat: FiatCurrency;
-  price: number; // fiat price per 1 crypto unit
+  price: number; // active fiat price per 1 crypto unit
   availableAmount: number;
   minLimit: number; // fiat
   maxLimit: number; // fiat

@@ -1,22 +1,23 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowRight, ChevronDown, ShieldCheck } from 'lucide-react';
 import { useExchange } from '../context/ExchangeContext';
-import { CryptoSymbol } from '../types/exchange';
-import { formatCompactUsd, formatFiat, formatPrice } from '../utils/format';
+import { FIAT_RATES } from '../data/seedData';
+import { CryptoSymbol, FiatCurrency } from '../types/exchange';
+import { formatCompactFiat, formatFiat, formatPrice } from '../utils/format';
 import { CoinIcon } from '../components/CoinIcon';
 
 const FAQ_ITEMS = [
   {
     q: 'How does Vault P2P escrow protect buyers and sellers?',
-    a: 'When a P2P order is opened, the seller’s crypto is immediately locked in Vault Escrow. Funds are only released to the buyer once the seller confirms receipt of the fiat payment, or resolved through Vault Arbitration if an appeal is raised.',
+    a: 'When a P2P order is opened, the seller’s crypto is immediately locked in Vault Escrow. Funds are only released to the buyer once the seller confirms receipt of the INR or global fiat payment, or resolved through Vault Arbitration if an appeal is raised.',
   },
   {
-    q: 'Are there platform fees on P2P trades or internal wallet transfers?',
-    a: 'Takers pay 0% platform fee on all P2P orders across Wise, Revolut, Bank Transfer, SEPA Instant, Zelle, and UPI. Transfers between your Spot Wallet and P2P Funding Wallet are also instant and free.',
+    q: 'Which Indian & global payment methods are supported on P2P?',
+    a: 'Takers pay 0% platform fee across UPI, IMPS, NEFT / RTGS, Digital eRupee (CBDC), Paytm Wallet, Wise, Revolut, SEPA Instant, and Bank Transfer. Internal transfers between Spot and Funding wallets are instant and free.',
   },
   {
-    q: 'How do I become a verified P2P Buyer or Seller merchant?',
-    a: 'Navigate to the P2P tab and click "Post Ad" to publish your own Buy or Sell offer with custom pricing, min/max fiat limits, and accepted payment methods.',
+    q: 'How do I export my India 1% TDS (Section 194S) VDA statement?',
+    a: 'Open the Wallet tab and select "India VDA Tax (1% TDS)" to inspect INR turnover across Spot sells, Conversions, and P2P disposals and download your CSV statement.',
   },
   {
     q: 'Can I trade spot markets and earn yield in the same account?',
@@ -29,6 +30,7 @@ export const HomeView: React.FC = () => {
     markets,
     p2pOffers,
     fiat,
+    setFiat,
     currentUser,
     openAuthPage,
     setActiveTab,
@@ -50,10 +52,13 @@ export const HomeView: React.FC = () => {
     [markets]
   );
 
-  const featuredP2P = useMemo(
-    () => p2pOffers.filter((o) => o.fiat === fiat).slice(0, 4),
-    [p2pOffers, fiat]
-  );
+  const featuredP2P = useMemo(() => {
+    const byFiat = p2pOffers.filter((o) => o.fiat === fiat);
+    const sellers = byFiat.filter((o) => o.merchantSide === 'SELL').slice(0, 2);
+    const buyers = byFiat.filter((o) => o.merchantSide === 'BUY').slice(0, 2);
+    const mixed = [...sellers, ...buyers];
+    return mixed.length > 0 ? mixed : byFiat.slice(0, 4);
+  }, [p2pOffers, fiat]);
 
   const fallbackP2P = useMemo(
     () => (featuredP2P.length > 0 ? featuredP2P : p2pOffers.slice(0, 4)),
@@ -71,20 +76,20 @@ export const HomeView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-16">
+    <div className="max-w-[1440px] mx-auto px-3 sm:px-6 py-5 sm:py-12 space-y-10 sm:space-y-16">
       {/* 1. Binance-Style Hero Split */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-stretch">
         {/* Left Hero Column */}
-        <div className="lg:col-span-7 flex flex-col justify-between py-2">
-          <div className="space-y-6">
+        <div className="lg:col-span-7 flex flex-col justify-between py-1 sm:py-2">
+          <div className="space-y-4 sm:space-y-6">
             <p className="text-xs font-semibold text-[#F0B90B]">
-              Zero-Fee P2P Escrow · Spot Exchange · Simple Earn
+              Zero-Fee INR P2P Escrow · UPI, IMPS & eRupee · Spot Exchange
             </p>
-            <h1 className="font-display text-[clamp(2.25rem,4vw,3.65rem)] font-bold leading-[1.08] tracking-tight text-slate-900 dark:text-[#EAECEF] [text-wrap:balance]">
-              Trade crypto peer-to-peer with institutional spot liquidity.
+            <h1 className="font-display text-[clamp(1.85rem,4vw,3.65rem)] font-bold leading-[1.1] tracking-tight text-slate-900 dark:text-[#EAECEF] [text-wrap:balance]">
+              Trade crypto in India & globally with institutional spot liquidity.
             </h1>
             <p className="text-base leading-relaxed text-slate-600 dark:text-[#848E9C] max-w-xl">
-              Buy and sell USDT, BTC, ETH, and SOL directly with verified merchants using local bank transfers, Wise, Revolut, or SEPA—backed by Vault Escrow and live order books.
+              Buy and sell USDT, BTC, ETH, and SOL directly with verified Indian & global merchants via UPI, IMPS, NEFT/RTGS, Digital eRupee, or Wise—backed by Vault Escrow and live order books.
             </p>
 
             {/* Quick Start CTA / Registration Strip */}
@@ -140,18 +145,18 @@ export const HomeView: React.FC = () => {
           </div>
 
           {/* 3-Column Platform Benchmark Strip */}
-          <div className="mt-10 pt-6 border-t border-slate-200 dark:border-[#2B3139] grid grid-cols-3 gap-6">
+          <div className="mt-8 sm:mt-10 pt-5 sm:pt-6 border-t border-slate-200 dark:border-[#2B3139] grid grid-cols-3 gap-3 sm:gap-6">
             <div>
-              <div className="font-mono text-2xl font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">0%</div>
-              <div className="mt-1 text-xs text-slate-500 dark:text-[#848E9C]">P2P Taker Escrow Fee</div>
+              <div className="font-mono text-lg sm:text-2xl font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">0%</div>
+              <div className="mt-1 text-[11px] sm:text-xs text-slate-500 dark:text-[#848E9C]">P2P Taker Fee</div>
             </div>
             <div>
-              <div className="font-mono text-2xl font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">20+</div>
-              <div className="mt-1 text-xs text-slate-500 dark:text-[#848E9C]">Verified Buyers & Sellers</div>
+              <div className="font-mono text-lg sm:text-2xl font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">110+</div>
+              <div className="mt-1 text-[11px] sm:text-xs text-slate-500 dark:text-[#848E9C]">Verified Merchants</div>
             </div>
             <div>
-              <div className="font-mono text-2xl font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">9.4%</div>
-              <div className="mt-1 text-xs text-slate-500 dark:text-[#848E9C]">Max Simple Earn APR</div>
+              <div className="font-mono text-lg sm:text-2xl font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">9.4%</div>
+              <div className="mt-1 text-[11px] sm:text-xs text-slate-500 dark:text-[#848E9C]">Max Earn APR</div>
             </div>
           </div>
         </div>
@@ -159,12 +164,12 @@ export const HomeView: React.FC = () => {
         {/* Right Hero Column: Binance-Style Live Market Watch Box */}
         <div className="lg:col-span-5 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] flex flex-col justify-between overflow-hidden">
           <div>
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-[#2B3139]">
-              <div className="flex items-center gap-4 text-xs font-semibold">
+            <div className="flex items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b border-slate-200 dark:border-[#2B3139]">
+              <div className="flex items-center gap-3.5 sm:gap-4 text-xs font-semibold overflow-x-auto no-scrollbar">
                 <button
                   type="button"
                   onClick={() => setTickerTab('popular')}
-                  className={`py-1 cursor-pointer ${
+                  className={`py-1 whitespace-nowrap shrink-0 cursor-pointer ${
                     tickerTab === 'popular'
                       ? 'text-slate-900 dark:text-[#EAECEF] border-b-2 border-[#F0B90B]'
                       : 'text-slate-500 dark:text-[#848E9C] hover:text-slate-900 dark:hover:text-[#EAECEF]'
@@ -175,7 +180,7 @@ export const HomeView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setTickerTab('gainers')}
-                  className={`py-1 cursor-pointer ${
+                  className={`py-1 whitespace-nowrap shrink-0 cursor-pointer ${
                     tickerTab === 'gainers'
                       ? 'text-slate-900 dark:text-[#EAECEF] border-b-2 border-[#F0B90B]'
                       : 'text-slate-500 dark:text-[#848E9C] hover:text-slate-900 dark:hover:text-[#EAECEF]'
@@ -186,7 +191,7 @@ export const HomeView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setTickerTab('p2p')}
-                  className={`py-1 cursor-pointer ${
+                  className={`py-1 whitespace-nowrap shrink-0 cursor-pointer ${
                     tickerTab === 'p2p'
                       ? 'text-slate-900 dark:text-[#EAECEF] border-b-2 border-[#F0B90B]'
                       : 'text-slate-500 dark:text-[#848E9C] hover:text-slate-900 dark:hover:text-[#EAECEF]'
@@ -198,7 +203,7 @@ export const HomeView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab(tickerTab === 'p2p' ? 'p2p' : 'markets')}
-                className="text-xs font-medium text-slate-500 dark:text-[#848E9C] hover:text-[#F0B90B] inline-flex items-center gap-1 cursor-pointer"
+                className="text-xs font-medium text-slate-500 dark:text-[#848E9C] hover:text-[#F0B90B] inline-flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <span>View All</span>
                 <ArrowRight className="w-3 h-3" />
@@ -257,10 +262,19 @@ export const HomeView: React.FC = () => {
 
                       <div className="text-right font-mono tabular-nums">
                         <div className="text-sm font-semibold text-slate-900 dark:text-[#EAECEF]">
-                          ${formatPrice(m.price)}
+                          {fiat === 'USD'
+                            ? `$${formatPrice(m.price)}`
+                            : formatFiat(m.price * FIAT_RATES[fiat].rateFromUsd, fiat)}
                         </div>
-                        <div className={`text-xs font-semibold ${pos ? 'text-[#0ECB81]' : 'text-[#F6465D]'}`}>
-                          {pos ? '+' : ''}{m.change24h.toFixed(2)}%
+                        <div className="flex items-center justify-end gap-2 text-xs font-semibold">
+                          {fiat !== 'USD' && (
+                            <span className="font-normal text-slate-400 dark:text-[#848E9C]">
+                              ${formatPrice(m.price)}
+                            </span>
+                          )}
+                          <span className={pos ? 'text-[#0ECB81]' : 'text-[#F6465D]'}>
+                            {pos ? '+' : ''}{m.change24h.toFixed(2)}%
+                          </span>
                         </div>
                       </div>
                     </button>
@@ -270,17 +284,34 @@ export const HomeView: React.FC = () => {
             )}
           </div>
 
-          <div className="px-5 py-3.5 border-t border-slate-200 dark:border-[#2B3139] bg-slate-50/70 dark:bg-[#14171C] flex items-center justify-between text-xs">
+          <div className="px-5 py-3.5 border-t border-slate-200 dark:border-[#2B3139] bg-slate-50/70 dark:bg-[#14171C] flex flex-wrap items-center justify-between gap-2 text-xs">
             <span className="text-slate-500 dark:text-[#848E9C]">
-              24h Global Spot Turnover: <strong className="font-mono text-slate-900 dark:text-[#EAECEF]">{formatCompactUsd(markets.reduce((s, m) => s + m.volume24h, 0))}</strong>
+              24h Turnover:{' '}
+              <strong className="font-mono text-slate-900 dark:text-[#EAECEF]">
+                {formatCompactFiat(markets.reduce((s, m) => s + m.volume24h, 0), fiat)}
+              </strong>
             </span>
-            <button
-              type="button"
-              onClick={() => setActiveTab('spot')}
-              className="font-semibold text-[#F0B90B] hover:underline cursor-pointer"
-            >
-              Trade Spot
-            </button>
+            <div className="flex items-center gap-3">
+              <select
+                value={fiat}
+                onChange={(e) => setFiat(e.target.value as FiatCurrency)}
+                aria-label="Display currency"
+                className="px-2 py-1 rounded border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] font-mono text-[11px] font-semibold text-slate-900 dark:text-[#EAECEF] focus:outline-none focus:border-[#F0B90B] cursor-pointer"
+              >
+                {(Object.keys(FIAT_RATES) as FiatCurrency[]).map((code) => (
+                  <option key={code} value={code}>
+                    {code} ({FIAT_RATES[code].symbol})
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setActiveTab('spot')}
+                className="font-semibold text-[#F0B90B] hover:underline cursor-pointer"
+              >
+                Trade Spot
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -323,14 +354,21 @@ export const HomeView: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-[#848E9C] tabular-nums">
-                  {offer.completedOrders.toLocaleString()} orders · {offer.completionRate}% completion
+                  {offer.completedOrders.toLocaleString('en-IN')} trades · {(offer.rating ?? 4.9).toFixed(1)} ★ ({offer.completionRate}%)
                 </p>
                 <div className="pt-2">
                   <div className="font-mono text-xl font-bold text-slate-900 dark:text-[#EAECEF] tabular-nums">
                     {formatFiat(offer.price, offer.fiat)}
                   </div>
-                  <div className="text-xs text-slate-500 dark:text-[#848E9C]">
-                    per {offer.asset} · {offer.paymentMethods.slice(0, 2).join(' · ')}
+                  {offer.quoteBuyPrice && offer.quoteSellPrice ? (
+                    <div className="mt-0.5 font-mono text-[11px] text-slate-500 dark:text-[#848E9C] tabular-nums">
+                      <span className="text-[#0ECB81]">Buy {formatFiat(offer.quoteBuyPrice, offer.fiat)}</span>
+                      {' · '}
+                      <span className="text-[#F6465D]">Sell {formatFiat(offer.quoteSellPrice, offer.fiat)}</span>
+                    </div>
+                  ) : null}
+                  <div className="mt-1 text-xs text-slate-500 dark:text-[#848E9C]">
+                    {offer.paymentMethods.slice(0, 2).join(' · ')} · {formatFiat(offer.minLimit, offer.fiat)}–{formatFiat(offer.maxLimit, offer.fiat)}
                   </div>
                 </div>
               </div>
@@ -369,7 +407,7 @@ export const HomeView: React.FC = () => {
                 01. P2P Escrow Desk
               </h3>
               <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-[#848E9C]">
-                Buy or sell crypto directly with verified counterparties via Bank Transfer, Wise, Revolut, SEPA, or UPI with live trade chat.
+                Buy or sell crypto directly with verified counterparties via UPI, IMPS, NEFT/RTGS, Digital eRupee, Paytm, or Wise with live trade chat.
               </p>
             </div>
             <button

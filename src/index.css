@@ -8,8 +8,17 @@
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   }
 
+  html {
+    overflow-x: hidden;
+    max-width: 100%;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
   body {
     font-family: var(--font-sans);
+    overflow-x: hidden;
+    max-width: 100%;
   }
 
   h1, h2, h3, h4, .font-display {
@@ -24,6 +33,15 @@
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Custom sleek scrollbar for order books and tables */

@@ -5,12 +5,22 @@ import { FIAT_RATES } from '../../data/seedData';
 import { CryptoSymbol, FiatCurrency, PaymentMethodType } from '../../types/exchange';
 
 const ALL_PAYMENT_METHODS: PaymentMethodType[] = [
+  'UPI',
+  'Google Pay (GPay)',
+  'PhonePe',
+  'Paytm UPI',
+  'BHIM UPI',
+  'CRED Pay',
+  'Amazon Pay UPI',
+  'IMPS',
+  'NEFT / RTGS',
+  'Digital eRupee',
+  'Paytm Wallet',
   'Bank Transfer',
   'Wise',
   'Revolut',
   'SEPA Instant',
   'Zelle',
-  'UPI',
   'Faster Payments',
   'PayPal',
 ];
@@ -21,12 +31,18 @@ export const PostAdModal: React.FC<{ open: boolean; onClose: () => void }> = ({ 
   const [merchantSide, setMerchantSide] = useState<'SELL' | 'BUY'>('SELL');
   const [asset, setAsset] = useState<CryptoSymbol>('USDT');
   const [fiat, setFiat] = useState<FiatCurrency>(defaultFiat);
-  const [price, setPrice] = useState<string>('1.002');
+  const [price, setPrice] = useState<string>(defaultFiat === 'INR' ? '104.25' : '1.002');
   const [availableAmount, setAvailableAmount] = useState<string>('2500');
-  const [minLimit, setMinLimit] = useState<string>('50');
-  const [maxLimit, setMaxLimit] = useState<string>('2500');
-  const [selectedMethods, setSelectedMethods] = useState<PaymentMethodType[]>(['Wise', 'Bank Transfer']);
-  const [terms, setTerms] = useState<string>('Fast verification. Personal verified accounts only.');
+  const [minLimit, setMinLimit] = useState<string>(defaultFiat === 'INR' ? '5000' : '50');
+  const [maxLimit, setMaxLimit] = useState<string>(defaultFiat === 'INR' ? '100000' : '2500');
+  const [selectedMethods, setSelectedMethods] = useState<PaymentMethodType[]>(
+    defaultFiat === 'INR' ? ['UPI', 'Google Pay (GPay)', 'PhonePe', 'IMPS'] : ['Wise', 'Bank Transfer']
+  );
+  const [terms, setTerms] = useState<string>(
+    defaultFiat === 'INR'
+      ? 'UPI / GPay / PhonePe / IMPS accepted 24x7 (₹5,000 – ₹1,00,000). PAN-verified accounts only.'
+      : 'Fast verification. Personal verified accounts only.'
+  );
 
   if (!open) return null;
 
@@ -37,9 +53,19 @@ export const PostAdModal: React.FC<{ open: boolean; onClose: () => void }> = ({ 
   };
 
   const handleAssetOrFiatChange = (nextAsset: CryptoSymbol, nextFiat: FiatCurrency) => {
+    if (nextFiat === 'INR' && (nextAsset === 'USDT' || nextAsset === 'USDC')) {
+      setPrice(merchantSide === 'SELL' ? '104.25' : '103.85');
+      setMinLimit('5000');
+      setMaxLimit('100000');
+      return;
+    }
     const usdPrice = markets.find((m) => m.symbol === nextAsset)?.price ?? 1;
     const rate = FIAT_RATES[nextFiat].rateFromUsd;
-    setPrice((usdPrice * rate).toFixed(nextAsset === 'USDT' || nextAsset === 'USDC' ? 3 : 2));
+    setPrice((usdPrice * rate).toFixed(2));
+    if (nextFiat === 'INR') {
+      setMinLimit('5000');
+      setMaxLimit('100000');
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -68,10 +94,10 @@ export const PostAdModal: React.FC<{ open: boolean; onClose: () => void }> = ({ 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4" role="dialog" aria-modal="true">
-      <div className="w-full max-w-xl rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-[#2B3139]">
-          <h2 className="font-display text-lg font-semibold text-slate-900 dark:text-[#EAECEF]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-3 sm:p-4" role="dialog" aria-modal="true">
+      <div className="w-full max-w-xl rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 dark:border-[#2B3139] shrink-0">
+          <h2 className="font-display text-base sm:text-lg font-semibold text-slate-900 dark:text-[#EAECEF]">
             Post a P2P Merchant Advertisement
           </h2>
           <button
@@ -84,7 +110,7 @@ export const PostAdModal: React.FC<{ open: boolean; onClose: () => void }> = ({ 
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto">
           <div className="grid grid-cols-2 gap-2 p-1 rounded-md bg-slate-100 dark:bg-[#0B0E11]">
             <button
               type="button"

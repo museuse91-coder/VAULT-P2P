@@ -35,10 +35,26 @@ export function formatCompactUsd(value: number): string {
   return `$${value.toFixed(2)}`;
 }
 
+export function formatCompactFiat(usdValue: number, fiat: FiatCurrency): string {
+  const info = FIAT_RATES[fiat];
+  const converted = usdValue * info.rateFromUsd;
+  if (fiat === 'INR') {
+    if (converted >= 1e7) return `₹${(converted / 1e7).toFixed(2)} Cr`;
+    if (converted >= 1e5) return `₹${(converted / 1e5).toFixed(2)} L`;
+    return `₹${converted.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+  }
+  if (converted >= 1e12) return `${info.symbol}${(converted / 1e12).toFixed(2)}T`;
+  if (converted >= 1e9) return `${info.symbol}${(converted / 1e9).toFixed(2)}B`;
+  if (converted >= 1e6) return `${info.symbol}${(converted / 1e6).toFixed(2)}M`;
+  if (converted >= 1e3) return `${info.symbol}${(converted / 1e3).toFixed(1)}K`;
+  return `${info.symbol}${converted.toFixed(2)}`;
+}
+
 export function formatFiat(amount: number, fiat: FiatCurrency): string {
   const info = FIAT_RATES[fiat];
-  const digits = fiat === 'NGN' || fiat === 'INR' ? 0 : 2;
-  return `${info.symbol}${amount.toLocaleString('en-US', {
+  const locale = fiat === 'INR' ? 'en-IN' : 'en-US';
+  const digits = fiat === 'NGN' ? 0 : fiat === 'INR' ? (amount < 200 ? 2 : 0) : 2;
+  return `${info.symbol}${amount.toLocaleString(locale, {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   })}`;

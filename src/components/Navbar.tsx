@@ -52,12 +52,12 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-[#2B3139] bg-white/95 dark:bg-[#0B0E11]/95 backdrop-blur-sm">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-8">
+      <div className="max-w-[1440px] mx-auto px-3 sm:px-6 h-14 md:h-16 flex items-center justify-between gap-3 md:gap-8">
         {/* Zone 1: Brand Wordmark */}
         <button
           type="button"
           onClick={() => handleSelect('home')}
-          className="font-display text-xl font-bold tracking-tight text-slate-900 dark:text-[#EAECEF] whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0B90B] rounded"
+          className="font-display text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-[#EAECEF] whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0B90B] rounded"
         >
           Vault P2P
         </button>
@@ -201,13 +201,13 @@ export const Navbar: React.FC = () => {
           </div>
         </nav>
 
-        {/* Zone 3: 1 Primary Action */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Zone 3: 1 Primary Action + Mobile Menu */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {currentUser ? (
             <button
               type="button"
               onClick={() => setDepositModalOpen(true)}
-              className="px-4 py-2 text-sm font-semibold text-[#0B0E11] bg-[#F0B90B] hover:bg-[#D9A708] rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0B90B]"
+              className="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-semibold text-[#0B0E11] bg-[#F0B90B] hover:bg-[#D9A708] rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0B90B]"
             >
               Deposit
             </button>
@@ -218,7 +218,7 @@ export const Navbar: React.FC = () => {
                 setMobileOpen(false);
                 openAuthPage('login');
               }}
-              className="px-4 py-2 text-sm font-semibold text-[#0B0E11] bg-[#F0B90B] hover:bg-[#D9A708] rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0B90B]"
+              className="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-semibold text-[#0B0E11] bg-[#F0B90B] hover:bg-[#D9A708] rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0B90B]"
             >
               Log In
             </button>
@@ -235,27 +235,45 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile app More / Quick Menu drawer */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#0B0E11] px-4 py-3 space-y-1">
-          {[...DIRECT_TABS, { id: 'earn' as NavTab, label: 'Earn' }, { id: 'wallet' as NavTab, label: 'Wallet' }].map((item) => {
-            const active = authPage === null && activeTab === item.id;
-            return (
+        <div className="md:hidden border-t border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#0B0E11] px-3 py-3 space-y-2 max-h-[75dvh] overflow-y-auto shadow-lg">
+          <div className="grid grid-cols-3 gap-2">
+            {[...DIRECT_TABS, { id: 'earn' as NavTab, label: 'Earn' }, { id: 'wallet' as NavTab, label: 'Wallet' }].map((item) => {
+              const active = authPage === null && activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleSelect(item.id)}
+                  className={`py-2.5 px-2 rounded-md border text-xs font-semibold text-center transition-colors cursor-pointer ${
+                    active
+                      ? 'border-[#F0B90B] bg-[#F0B90B]/10 text-[#F0B90B]'
+                      : 'border-slate-200 dark:border-[#2B3139] text-slate-700 dark:text-[#EAECEF]'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+          {currentUser ? (
+            <div className="pt-2 border-t border-slate-200 dark:border-[#2B3139] flex items-center justify-between gap-2">
+              <span className="text-xs text-slate-500 dark:text-[#848E9C] truncate">
+                {currentUser.fullName}
+              </span>
               <button
-                key={item.id}
                 type="button"
-                onClick={() => handleSelect(item.id)}
-                className={`w-full text-left px-3 py-2.5 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-                  active
-                    ? 'bg-slate-100 dark:bg-[#1E2329] text-slate-900 dark:text-[#EAECEF]'
-                    : 'text-slate-600 dark:text-[#848E9C]'
-                }`}
+                onClick={() => {
+                  setMobileOpen(false);
+                  logoutUser();
+                }}
+                className="px-3 py-1.5 rounded-md border border-[#F6465D]/40 text-xs font-semibold text-[#F6465D] cursor-pointer shrink-0"
               >
-                {item.label}
+                Log Out
               </button>
-            );
-          })}
-          {!currentUser && (
+            </div>
+          ) : (
             <div className="pt-2 border-t border-slate-200 dark:border-[#2B3139] flex gap-2">
               <button
                 type="button"
@@ -263,7 +281,7 @@ export const Navbar: React.FC = () => {
                   setMobileOpen(false);
                   openAuthPage('login');
                 }}
-                className="flex-1 py-2 rounded-md border border-slate-200 dark:border-[#2B3139] text-xs font-semibold text-slate-900 dark:text-[#EAECEF] cursor-pointer"
+                className="flex-1 py-2.5 rounded-md border border-slate-200 dark:border-[#2B3139] text-xs font-semibold text-slate-900 dark:text-[#EAECEF] cursor-pointer"
               >
                 Log In
               </button>
@@ -273,7 +291,7 @@ export const Navbar: React.FC = () => {
                   setMobileOpen(false);
                   openAuthPage('signup');
                 }}
-                className="flex-1 py-2 rounded-md bg-[#F0B90B] text-xs font-semibold text-[#0B0E11] cursor-pointer"
+                className="flex-1 py-2.5 rounded-md bg-[#F0B90B] text-xs font-semibold text-[#0B0E11] cursor-pointer"
               >
                 Sign Up
               </button>

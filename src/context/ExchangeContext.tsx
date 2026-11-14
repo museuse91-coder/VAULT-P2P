@@ -53,7 +53,7 @@ interface PersistedState {
   paymentMethods: UserPaymentMethod[];
 }
 
-const STORAGE_KEY = 'vault_p2p_exchange_v1';
+const STORAGE_KEY = 'vault_p2p_exchange_v4';
 
 const DEMO_ACCOUNT: StoredAccount = {
   id: 'usr-demo',
@@ -127,6 +127,7 @@ interface ExchangeContextValue {
   createP2PAd: (ad: Omit<P2POffer, 'id' | 'merchantId' | 'merchantName' | 'isVerified' | 'completedOrders' | 'completionRate' | 'avgReleaseMinutes'>) => void;
   toggleP2PAdStatus: (offerId: string) => void;
   deleteP2PAd: (offerId: string) => void;
+  randomizeP2PRates: () => void;
   addPaymentMethod: (pm: Omit<UserPaymentMethod, 'id'>) => void;
   removePaymentMethod: (id: string) => void;
 
@@ -143,17 +144,33 @@ const ExchangeContext = createContext<ExchangeContextValue | null>(null);
 
 function loadPersistedState(): PersistedState {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const rawCurrent = localStorage.getItem(STORAGE_KEY);
+    const rawLegacy = rawCurrent
+      ? null
+      : (localStorage.getItem('vault_p2p_exchange_v3') ??
+        localStorage.getItem('vault_p2p_exchange_v2') ??
+        localStorage.getItem('vault_p2p_exchange_v1'));
+    const raw = rawCurrent ?? rawLegacy;
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<PersistedState>;
+      const existingOffers = parsed.p2pOffers ?? [];
+      let mergedOffers: P2POffer[];
+      if (rawCurrent && existingOffers.length > 0) {
+        const existingIds = new Set(existingOffers.map((o) => o.id));
+        mergedOffers = [...existingOffers, ...INITIAL_P2P_OFFERS.filter((o) => !existingIds.has(o.id))];
+      } else {
+        // When upgrading from v1/v2/v3, keep any custom user ads and load fresh INITIAL_P2P_OFFERS
+        const customUserAds = existingOffers.filter((o) => o.isUserAd);
+        mergedOffers = [...customUserAds, ...INITIAL_P2P_OFFERS];
+      }
       return {
         theme: parsed.theme === 'light' ? 'light' : 'dark',
-        fiat: parsed.fiat && FIAT_RATES[parsed.fiat] ? parsed.fiat : 'USD',
+        fiat: parsed.fiat && FIAT_RATES[parsed.fiat] ? parsed.fiat : 'INR',
         hideBalances: Boolean(parsed.hideBalances),
         currentUser: parsed.currentUser !== undefined ? parsed.currentUser : null,
         accounts: parsed.accounts && parsed.accounts.length > 0 ? parsed.accounts : [DEMO_ACCOUNT],
         balances: parsed.balances ?? INITIAL_BALANCES,
-        p2pOffers: parsed.p2pOffers ?? INITIAL_P2P_OFFERS,
+        p2pOffers: mergedOffers,
         p2pOrders: parsed.p2pOrders ?? [],
         spotOrders: parsed.spotOrders ?? INITIAL_SPOT_ORDERS,
         tradeHistory: parsed.tradeHistory ?? INITIAL_TRADE_EXECUTIONS,
@@ -167,7 +184,7 @@ function loadPersistedState(): PersistedState {
   }
   return {
     theme: 'dark',
-    fiat: 'USD',
+    fiat: 'INR',
     hideBalances: false,
     currentUser: null,
     accounts: [DEMO_ACCOUNT],
@@ -295,6 +312,7 @@ export const ExchangeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (window.location.pathname !== targetPath) {
         window.history.pushState(null, '', targetPath);
       }
+      window.scrollTo(0, 0);
     }
   }, []);
 
@@ -784,6 +802,54 @@ export const ExchangeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }));
       }
 
+      const cleanSlug = offer.merchantName.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const isUpiApp =
+        paymentMethod === 'UPI' ||
+        paymentMethod === 'Google Pay (GPay)' ||
+        paymentMethod === 'PhonePe' ||
+        paymentMethod === 'Paytm UPI' ||
+        paymentMethod === 'BHIM UPI' ||
+        paymentMethod === 'CRED Pay' ||
+        paymentMethod === 'Amazon Pay UPI';
+
+      const upiHandleSuffix =
+        paymentMethod === 'Google Pay (GPay)'
+          ? 'okaxis'
+          : paymentMethod === 'PhonePe'
+            ? 'ybl'
+            : paymentMethod === 'Paytm UPI'
+              ? 'paytm'
+              : paymentMethod === 'BHIM UPI'
+                ? 'upi'
+                : paymentMethod === 'CRED Pay'
+                  ? 'axisb'
+                  : paymentMethod === 'Amazon Pay UPI'
+                    ? 'apl'
+                    : 'okicici';
+
+      const accountNumber = isUpiApp
+        ? `${cleanSlug}@${upiHandleSuffix}`
+        : paymentMethod === 'Paytm Wallet'
+          ? `+91 98${Math.floor(10000000 + Math.random() * 89999999)}`
+          : paymentMethod === 'Digital eRupee'
+            ? `eINR-${cleanSlug.slice(0, 8).toUpperCase()}-4921`
+            : paymentMethod === 'IMPS' || paymentMethod === 'NEFT / RTGS'
+              ? `50100${Math.floor(100000000 + Math.random() * 899999999)} (IFSC: ICIC0000421)`
+              : paymentMethod === 'Wise' || paymentMethod === 'PayPal'
+                ? `settlement@${cleanSlug}.io`
+                : `ACCT-${Math.floor(40000000 + Math.random() * 59999999)}`;
+
+      const bankName =
+        paymentMethod === 'UPI'
+          ? 'UPI (Any NPCI App)'
+          : isUpiApp
+            ? paymentMethod
+            : paymentMethod === 'IMPS' || paymentMethod === 'NEFT / RTGS'
+              ? 'ICICI Bank India'
+              : paymentMethod === 'Digital eRupee'
+                ? 'RBI e₹ Retail Wallet'
+                : `${paymentMethod} Clearing`;
+
       const orderId = `P2P-${Math.floor(100000 + Math.random() * 900000)}`;
       const refCode = `VP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
       const newOrder: P2POrder = {
@@ -799,12 +865,9 @@ export const ExchangeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         fiatAmount,
         paymentMethod,
         paymentDetails: {
-          accountName: userSide === 'BUY' ? `${offer.merchantName} Treasury Ltd` : `${currentUser?.fullName ?? 'Alex Mercer'} (Your Saved Method)`,
-          accountNumber:
-            paymentMethod === 'Wise' || paymentMethod === 'PayPal'
-              ? `settlement@${offer.merchantName.toLowerCase().replace(/[^a-z0-9]/g, '')}.io`
-              : `ACCT-${Math.floor(40000000 + Math.random() * 59999999)}`,
-          bankName: `${paymentMethod} Clearing`,
+          accountName: userSide === 'BUY' ? `${offer.merchantName}` : `${currentUser?.fullName ?? 'Alex Mercer'} (Your Saved Method)`,
+          accountNumber,
+          bankName,
           referenceCode: refCode,
         },
         status: 'PENDING_PAYMENT',
@@ -814,7 +877,7 @@ export const ExchangeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           {
             id: `msg-${Date.now()}-sys`,
             sender: 'SYSTEM',
-            text: `Escrow locked ${cryptoAmount} ${offer.asset}. Never release funds before verifying receipt in your ${paymentMethod} account.`,
+            text: `Escrow locked ${cryptoAmount} ${offer.asset}. Never release funds before verifying receipt in your ${paymentMethod} account.${offer.fiat === 'INR' ? ' Do not mention crypto or BTC/USDT in UPI/IMPS remarks.' : ''}`,
             timestamp: Date.now(),
           },
           {
@@ -822,8 +885,8 @@ export const ExchangeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             sender: 'COUNTERPARTY',
             text:
               userSide === 'BUY'
-                ? `Hi! I'm online and ready. Please transfer ${fiatAmount.toLocaleString()} ${offer.fiat} via ${paymentMethod} using ref ${refCode} and click "Mark as Paid".`
-                : `Hi! Your ${cryptoAmount} ${offer.asset} is in Vault escrow. Sending ${fiatAmount.toLocaleString()} ${offer.fiat} to your ${paymentMethod} now — I will notify you shortly.`,
+                ? `Namaste! I'm online. Please transfer ${fiatAmount.toLocaleString(offer.fiat === 'INR' ? 'en-IN' : 'en-US')} ${offer.fiat} via ${paymentMethod} using ref ${refCode}${offer.fiat === 'INR' ? ' (share UTR if using IMPS/UPI)' : ''} and click "Transferred, Notify Seller".`
+                : `Hi! Your ${cryptoAmount} ${offer.asset} is in Vault escrow. Sending ${fiatAmount.toLocaleString(offer.fiat === 'INR' ? 'en-IN' : 'en-US')} ${offer.fiat} to your ${paymentMethod} now — I will notify you shortly.`,
             timestamp: Date.now() + 50,
           },
         ],
@@ -1094,6 +1157,12 @@ export const ExchangeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         completedOrders: 142,
         completionRate: 99.3,
         avgReleaseMinutes: 4,
+        location: ad.fiat === 'INR' ? 'India Desk' : 'Global Desk',
+        rating: 4.9,
+        positiveRate: 99.4,
+        reviewsCount: 48,
+        quoteBuyPrice: ad.merchantSide === 'SELL' ? ad.price : undefined,
+        quoteSellPrice: ad.merchantSide === 'BUY' ? ad.price : undefined,
       };
       setP2pOffers((prev) => [newAd, ...prev]);
       notify(`Published P2P ${ad.merchantSide} Ad for ${ad.asset}/${ad.fiat}`, 'success');
@@ -1112,6 +1181,27 @@ export const ExchangeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     },
     [notify]
   );
+
+  const randomizeP2PRates = useCallback(() => {
+    const randBetween = (min: number, max: number) =>
+      Number((min + Math.random() * (max - min)).toFixed(2));
+    setP2pOffers((prev) =>
+      prev.map((o) => {
+        if (o.isUserAd || o.fiat !== 'INR' || (o.asset !== 'USDT' && o.asset !== 'USDC')) {
+          return o;
+        }
+        const nextBuy = randBetween(103.2, 110.86);
+        const nextSell = randBetween(102.67, 105.0);
+        return {
+          ...o,
+          quoteBuyPrice: nextBuy,
+          quoteSellPrice: nextSell,
+          price: o.merchantSide === 'SELL' ? nextBuy : nextSell,
+        };
+      })
+    );
+    notify('Refreshed live INR P2P Buy (₹103.20–₹110.86) & Sell (₹102.67–₹105.00) quotes', 'info');
+  }, [notify]);
 
   const addPaymentMethod = useCallback(
     (pm: Omit<UserPaymentMethod, 'id'>) => {
@@ -1375,6 +1465,7 @@ export const ExchangeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         createP2PAd,
         toggleP2PAdStatus,
         deleteP2PAd,
+        randomizeP2PRates,
         addPaymentMethod,
         removePaymentMethod,
         depositFunds,

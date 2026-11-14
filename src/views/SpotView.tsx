@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowDownUp } from 'lucide-react';
 import { useExchange } from '../context/ExchangeContext';
+import { FIAT_RATES } from '../data/seedData';
 import { CryptoSymbol, OrderBookLevel, RecentMarketTrade, SpotOrderType, TradeSide } from '../types/exchange';
-import { formatCompactUsd, formatCrypto, formatPrice, formatTimeAgo } from '../utils/format';
+import { formatCompactUsd, formatCrypto, formatFiat, formatPrice, formatTimeAgo } from '../utils/format';
 import { CandlestickChart } from '../components/CandlestickChart';
 import { CoinIcon } from '../components/CoinIcon';
 
@@ -22,6 +23,7 @@ export const SpotView: React.FC = () => {
     cancelSpotOrder,
     convertAssets,
     theme,
+    fiat,
   } = useExchange();
 
   const [terminalMode, setTerminalMode] = useState<'spot' | 'convert'>('spot');
@@ -39,6 +41,7 @@ export const SpotView: React.FC = () => {
   const [stopInput, setStopInput] = useState<string>((asset.price * 0.99).toFixed(2));
   const [amountInput, setAmountInput] = useState<string>('');
   const [bookTab, setBookTab] = useState<'book' | 'trades'>('book');
+  const [mobilePanel, setMobilePanel] = useState<'all' | 'chart' | 'book' | 'trade'>('all');
   const [blotterTab, setBlotterTab] = useState<'open' | 'history' | 'trades' | 'funds'>('open');
 
   // Instant Convert state
@@ -144,17 +147,17 @@ export const SpotView: React.FC = () => {
   const openOrdersList = useMemo(() => spotOrders.filter((o) => o.status === 'OPEN'), [spotOrders]);
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-4 space-y-4">
+    <div className="max-w-[1440px] mx-auto px-3 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
       {/* Terminal Top Strip: Pair Selector + 24h Ticker + Mode Toggle */}
-      <div className="rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-6">
-          <div className="flex items-center gap-2.5">
-            <CoinIcon symbol={baseAsset} size={26} />
+      <div className="rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] px-3 sm:px-4 py-2.5 sm:py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex flex-wrap items-center justify-between sm:justify-start gap-3 sm:gap-6">
+          <div className="flex items-center gap-2">
+            <CoinIcon symbol={baseAsset} size={24} />
             <select
               aria-label="Trading pair"
               value={selectedSpotPair}
               onChange={(e) => setSelectedSpotPair(e.target.value)}
-              className="font-display text-base font-bold bg-transparent text-slate-900 dark:text-[#EAECEF] focus:outline-none cursor-pointer"
+              className="font-display text-sm sm:text-base font-bold bg-transparent text-slate-900 dark:text-[#EAECEF] focus:outline-none cursor-pointer"
             >
               {SPOT_PAIRS.map((pair) => (
                 <option key={pair} value={pair} className="bg-white dark:bg-[#181A20]">
@@ -164,12 +167,14 @@ export const SpotView: React.FC = () => {
             </select>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 text-xs tabular-nums">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs tabular-nums">
             <div>
-              <div className={`font-mono text-base font-bold ${asset.change24h >= 0 ? 'text-[#0ECB81]' : 'text-[#F6465D]'}`}>
+              <div className={`font-mono text-sm sm:text-base font-bold ${asset.change24h >= 0 ? 'text-[#0ECB81]' : 'text-[#F6465D]'}`}>
                 ${formatPrice(asset.price)}
               </div>
-              <div className="text-[11px] text-slate-500 dark:text-[#848E9C]">Last Price</div>
+              <div className="text-[11px] font-mono text-slate-500 dark:text-[#848E9C]">
+                {fiat !== 'USD' ? `≈ ${formatFiat(asset.price * FIAT_RATES[fiat].rateFromUsd, fiat)}` : 'Last Price'}
+              </div>
             </div>
 
             <div>
@@ -197,11 +202,11 @@ export const SpotView: React.FC = () => {
         </div>
 
         {/* Spot vs Convert Mode Switch */}
-        <div className="inline-flex p-1 rounded-md bg-slate-100 dark:bg-[#0B0E11] border border-slate-200 dark:border-[#2B3139]">
+        <div className="grid grid-cols-2 sm:inline-flex p-1 rounded-md bg-slate-100 dark:bg-[#0B0E11] border border-slate-200 dark:border-[#2B3139] w-full md:w-auto">
           <button
             type="button"
             onClick={() => setTerminalMode('spot')}
-            className={`px-3 py-1.5 rounded text-xs font-semibold cursor-pointer ${
+            className={`px-3 py-1.5 rounded text-xs font-semibold cursor-pointer text-center ${
               terminalMode === 'spot'
                 ? 'bg-white dark:bg-[#2B3139] text-slate-900 dark:text-[#EAECEF]'
                 : 'text-slate-500 dark:text-[#848E9C]'
@@ -212,7 +217,7 @@ export const SpotView: React.FC = () => {
           <button
             type="button"
             onClick={() => setTerminalMode('convert')}
-            className={`px-3 py-1.5 rounded text-xs font-semibold cursor-pointer ${
+            className={`px-3 py-1.5 rounded text-xs font-semibold cursor-pointer text-center ${
               terminalMode === 'convert'
                 ? 'bg-white dark:bg-[#2B3139] text-[#F0B90B]'
                 : 'text-slate-500 dark:text-[#848E9C]'
@@ -224,10 +229,10 @@ export const SpotView: React.FC = () => {
       </div>
 
       {terminalMode === 'convert' ? (
-        <div className="max-w-xl mx-auto py-8">
+        <div className="max-w-xl mx-auto py-4 sm:py-8">
           <form
             onSubmit={handleConvertSubmit}
-            className="rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] p-6 space-y-5"
+            className="rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] p-4 sm:p-6 space-y-4 sm:space-y-5"
           >
             <div>
               <h2 className="font-display text-xl font-bold text-slate-900 dark:text-[#EAECEF]">
@@ -327,10 +332,39 @@ export const SpotView: React.FC = () => {
         </div>
       ) : (
         <>
+          {/* Mobile Spot Terminal Quick Tabs */}
+          <div className="lg:hidden grid grid-cols-4 gap-1 p-1 rounded-md bg-slate-100 dark:bg-[#181A20] border border-slate-200 dark:border-[#2B3139]">
+            {(
+              [
+                { id: 'all', label: 'All' },
+                { id: 'chart', label: 'Chart' },
+                { id: 'book', label: 'Book' },
+                { id: 'trade', label: 'Trade' },
+              ] as const
+            ).map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setMobilePanel(tab.id)}
+                className={`py-1.5 rounded text-xs font-semibold transition-colors cursor-pointer ${
+                  mobilePanel === tab.id
+                    ? 'bg-white dark:bg-[#2B3139] text-[#F0B90B]'
+                    : 'text-slate-600 dark:text-[#848E9C]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           {/* 3-Column Trading Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 items-stretch">
             {/* Left/Center: Candlestick Chart */}
-            <div className="lg:col-span-6 xl:col-span-7 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] flex flex-col min-h-[420px]">
+            <div
+              className={`lg:col-span-6 xl:col-span-7 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] flex flex-col min-h-[290px] sm:min-h-[420px] ${
+                mobilePanel !== 'all' && mobilePanel !== 'chart' ? 'hidden lg:flex' : 'flex'
+              }`}
+            >
               <CandlestickChart
                 symbol={baseAsset}
                 candles={candlesBySymbol[baseAsset] ?? []}
@@ -339,7 +373,11 @@ export const SpotView: React.FC = () => {
             </div>
 
             {/* Middle: Order Book & Market Trades */}
-            <div className="lg:col-span-3 xl:col-span-2 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] flex flex-col">
+            <div
+              className={`lg:col-span-3 xl:col-span-2 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] flex flex-col ${
+                mobilePanel !== 'all' && mobilePanel !== 'book' ? 'hidden lg:flex' : 'flex'
+              }`}
+            >
               <div className="flex border-b border-slate-200 dark:border-[#2B3139] text-xs font-semibold">
                 <button
                   type="button"
@@ -448,7 +486,11 @@ export const SpotView: React.FC = () => {
             </div>
 
             {/* Right: Spot Order Ticket */}
-            <div className="lg:col-span-3 xl:col-span-3 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] p-4 flex flex-col justify-between">
+            <div
+              className={`lg:col-span-3 xl:col-span-3 rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] p-3.5 sm:p-4 flex flex-col justify-between ${
+                mobilePanel !== 'all' && mobilePanel !== 'trade' ? 'hidden lg:flex' : 'flex'
+              }`}
+            >
               <form onSubmit={handlePlaceOrder} className="space-y-4">
                 <div className="grid grid-cols-2 gap-1 p-1 rounded-md bg-slate-100 dark:bg-[#0B0E11]">
                   <button
@@ -577,7 +619,7 @@ export const SpotView: React.FC = () => {
 
           {/* Bottom Order & Execution Blotter */}
           <div className="rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] overflow-hidden">
-            <div className="flex items-center gap-6 px-5 border-b border-slate-200 dark:border-[#2B3139] text-xs font-semibold">
+            <div className="flex items-center gap-4 sm:gap-6 px-3 sm:px-5 border-b border-slate-200 dark:border-[#2B3139] text-xs font-semibold overflow-x-auto no-scrollbar">
               {(
                 [
                   { id: 'open', label: `Open Orders (${openOrdersList.length})` },
@@ -590,7 +632,7 @@ export const SpotView: React.FC = () => {
                   key={t.id}
                   type="button"
                   onClick={() => setBlotterTab(t.id)}
-                  className={`py-3 relative cursor-pointer whitespace-nowrap ${
+                  className={`py-3 relative cursor-pointer whitespace-nowrap shrink-0 ${
                     blotterTab === t.id
                       ? 'text-slate-900 dark:text-[#EAECEF]'
                       : 'text-slate-500 dark:text-[#848E9C] hover:text-slate-900 dark:hover:text-[#EAECEF]'
@@ -604,7 +646,7 @@ export const SpotView: React.FC = () => {
 
             <div className="overflow-x-auto">
               {blotterTab === 'open' && (
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-xs min-w-[540px]">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-[#2B3139] text-slate-500 dark:text-[#848E9C]">
                       <th className="py-3 px-5">Pair</th>

@@ -61,13 +61,13 @@ export const P2PTradeRoomModal: React.FC<P2PTradeRoomModalProps> = ({ orderId, o
         : 3;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true">
-      <div className="w-full max-w-4xl rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2.5 sm:p-4" role="dialog" aria-modal="true">
+      <div className="w-full max-w-4xl rounded-lg border border-slate-200 dark:border-[#2B3139] bg-white dark:bg-[#181A20] shadow-2xl overflow-hidden flex flex-col max-h-[92dvh]">
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-b border-slate-200 dark:border-[#2B3139]">
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 dark:border-[#2B3139] shrink-0">
           <div>
-            <div className="flex items-center gap-2.5">
-              <h2 className="font-display text-lg font-semibold text-slate-900 dark:text-[#EAECEF]">
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-base sm:text-lg font-semibold text-slate-900 dark:text-[#EAECEF]">
                 {order.userSide === 'BUY' ? `Buy ${order.asset}` : `Sell ${order.asset}`} · {order.id}
               </h2>
               <span
@@ -123,8 +123,8 @@ export const P2PTradeRoomModal: React.FC<P2PTradeRoomModalProps> = ({ orderId, o
         {/* Main Split Body */}
         <div className="flex-1 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-[#2B3139]">
           {/* Left: Payment & Escrow Controls */}
-          <div className="lg:col-span-7 p-6 space-y-5">
-            <div className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-200 dark:border-[#2B3139]">
+          <div className="lg:col-span-7 p-4 sm:p-6 space-y-4 sm:space-y-5">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 pb-3 sm:pb-4 border-b border-slate-200 dark:border-[#2B3139]">
               <div>
                 <p className="text-xs text-slate-500 dark:text-[#848E9C]">Fiat Amount</p>
                 <p className="font-mono text-base font-bold text-slate-900 dark:text-[#EAECEF] mt-0.5">
@@ -157,6 +157,9 @@ export const P2PTradeRoomModal: React.FC<P2PTradeRoomModalProps> = ({ orderId, o
               <div className="grid grid-cols-2 gap-y-2 pt-1">
                 <span className="text-slate-500 dark:text-[#848E9C]">Account Name</span>
                 <span className="font-medium text-slate-900 dark:text-[#EAECEF] text-right">{order.paymentDetails.accountName}</span>
+
+                <span className="text-slate-500 dark:text-[#848E9C]">Bank / Network</span>
+                <span className="font-medium text-slate-900 dark:text-[#EAECEF] text-right">{order.paymentDetails.bankName}</span>
 
                 <span className="text-slate-500 dark:text-[#848E9C]">Account / ID</span>
                 <button
